@@ -1,0 +1,59 @@
+---
+title: "trabalho Regressão parte 02"
+date: "6 de dezembro de 2016"
+output: pdf_document
+---
+
+```{r pacotes}
+pacotes = c("tidyverse","dplyr","plyr","reshape2")
+install.packages(pacotes)
+```
+
+```{r leitura}
+library(tidyverse)
+library(dplyr)
+
+#leitura dos dados
+
+dados = read.table("http://www.ime.unicamp.br/~cnaber/reg3.dat")
+names(dados)=c("Estado","pop","percap","analf","expvida","crime","estud","ndias","area")
+
+#criação variável dens
+dados = dados %>% mutate(dens=pop/area)
+
+#seleção das variáveis segundo orientação do Caio
+dados = dados %>% select(percap, analf, crime, estud, ndias,dens,expvida)
+```
+
+```{r descritivas}
+library("plyr")
+library("reshape2")
+
+estat_desc <- dados
+estat_desc$Estado = NULL
+
+df <- melt(estat_desc, id.vars = 0)
+resumo <- ddply(df, c("variable"), function(x) summary(x$value))
+df=factor(df$variable)
+
+ggplot(df, aes(variable, value)) +
+  geom_boxplot() +
+  facet_wrap(~variable, scales = "free") +  theme_bw()
+```
+
+
+```{r modelo}
+
+#Padronizacao dos dados
+dados[,c(1:ncol(dados))] =  sapply(dados[,c(1:ncol(dados))], function(x) (x-mean(x))/sd(x))
+
+#modelo padronizado
+fit1= lm(expvida~percap+analf+crime+estud+ndias+dens,data=dados)
+summary(fit1)
+```
+
+```{r}
+#seleção 
+step(fit1,direction = "both")
+```
+
