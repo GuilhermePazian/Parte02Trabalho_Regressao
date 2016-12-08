@@ -1,0 +1,8 @@
+base
+ggplot2
+gridExtra
+reshape2
+plyr
+dplyr
+car
+captioner

@@ -1,0 +1,150 @@
+---
+title: ""
+geometry: textwidth=18cm,textheight=21cm
+setspace: doublespacing
+lang: pt-br
+header-includes:
+- \usepackage{setspace}
+- \usepackage{indentfirst}
+- \usepackage[utf8]{inputenc}
+- \usepackage{mathptmx}
+- \usepackage{enumerate}
+- \usepackage{url} 
+- \usepackage{lipsum}
+output:
+  pdf_document:
+  html_document: default
+  fig_caption: yes
+  mainfont: Times New Roman
+  
+fontsize: 10pt
+
+---
+
+\begin{titlepage}
+\begin{center}
+\thispagestyle{empty}
+\begin{figure}[!htb]
+\begin{center}
+\begin{minipage}[b]{0.5\linewidth}
+\begin{center}
+\includegraphics[width=100pt,height=150pt]{logo/logoimeccunicamp.png}
+\end{center}
+\end{minipage}
+\begin{minipage}[b]{0.7\linewidth}
+\begin{center}
+\vspace*{1cm}
+ {\large \bf Universidade Estadual de Campinas\\[5pt]
+Instituto de Matemática, Estatística e Computação Cientifica\\[3pt]
+Departamento de Estatística}
+\end{center}
+\end{minipage}
+\end{center}
+\end{figure}
+\vspace*{\stretch{1}}
+\begin{center}
+\vspace*{5cm}
+{\huge \bf Relatório - Parte II \\[7pt]
+Trabalho Final de ME613}
+\end{center}
+\vspace*{\stretch{1}}
+\begin{center}
+\vspace*{4cm}
+{\Large \bf Eliane Ramos de Siqueira  RA:155233 \\
+Guilherme Pazian  RA:160323 \\
+Henrique Capatto  RA:146406 \\
+Murilo Salgado Razoli  RA:150987 \break
+}\\[3pt]
+{\large \bf Professor: Caio Lucidius Naberezny Azevedo}\\[5pt]
+\end{center}
+\vspace*{\stretch{1}}
+\centerline{\bf Campinas-SP, 08 de Dezembro de 2016}
+\vspace*{\stretch{1}}
+\end{center}
+\end{titlepage}
+
+\onehalfspacing
+\newpage
+
+```{r,echo=FALSE}
+#Colocar códigos que não vao aparecer AQUI
+```
+
+
+\begin{enumerate}
+\item Introdução
+\end{enumerate}
+\vspace{0.3cm}
+\setlength{\parindent}{3em}
+  Escrever introdução aqui
+
+\vspace{1.5cm}
+
+```{r, echo=FALSE}
+#Leitura dos dados aqui
+```
+
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item Análise descritiva
+\end{enumerate}
+\vspace{0.3cm}
+
+Escrever análise descritiva e colocar os gráficos aqui
+```{r,echo=FALSE}
+#COLOCAR CÓDIGOS DA ANÁLISE DESCRITIVA AQUI
+```
+
+\vspace{0.5cm}
+\begin{enumerate}
+\setcounter{enumi}{2}
+\item Análise Inferencial
+\end{enumerate}
+\vspace{0.3cm}
+  Escrever análise inferencial aqui
+  
+  colocar os modelos, analise de residuo e bla bla bla
+  
+  
+```{r,echo=FALSE}
+#COLOCAR CÓDIGOS DA ANÁLISE INFERENCIAL AQUI
+```
+
+\vspace{0.5cm}
+\begin{enumerate}
+\setcounter{enumi}{3}
+\item Conclusões
+\end{enumerate}
+\vspace{0.3cm}
+
+escrever conclusões<p>
+escrever conclusões<p>
+aqui
+
+\vspace{0.5cm}
+
+
+\begin{enumerate}
+\setcounter{enumi}{4}
+\item Referências Bibliográficas
+\end{enumerate}
+
+\vspace{0.3cm}
+\begin{itemize}
+  \item Azevedo, C. L. N (2016). Notas de aula sobre planejamento e análise de experimentos,\url{http://www.ime.unicamp.br/~cnaber/Material_ME613_2S_20
+16.htm}
+  \item Faraway, J. J. (2014). Linear Models with R, Second Edition,Chapman e Hall/CRC Texts in Statistical Science
+  \item Draper, N. R. and Smith, H. (1998). Applied regression analysis, third edition. New York, NY: John Wiley e Sons.
+  \item Paula, G. A. (2013). Modelos de regressão com apoio computacional, versão pré-eliminar \url{ https://www.ime.usp.br/~giapaula/texto_2013.pdf}
+  
+\end{itemize}
+
+\vspace{0.5cm}
+
+\begin{enumerate}
+\setcounter{enumi}{5}
+\item Apêndice
+\end{enumerate}
+\vspace{0.3cm}
+
+
