@@ -8,7 +8,7 @@ output: pdf_document
 #eval= FALSE faz com que o R ignore este chunk
 #echo = FALSE não permite que o chunk apareça no pdf
 
-pacotes = c("tidyverse","dplyr","plyr","reshape2")
+pacotes = c("tidyverse","plyr","dplyr","reshape2")
 install.packages(pacotes)
 ```
 
@@ -169,6 +169,7 @@ plot(di,xlab="Índice", ylab="Distância de Cook", pch=16,cex=1.1,cex.axis=1.1,c
 
 ```{r leitura,echo = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
+library(plyr)
 library(tidyverse)
 library(dplyr)
 
@@ -184,9 +185,11 @@ dados = dados %>% mutate(dens=pop/area)
 dados = dados %>% select(percap, analf, crime, estud, ndias,dens,expvida)
 ```
 
+#2.Análise Descritiva
+
 ```{r descritivas,echo = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
-library(plyr)
+
 library(reshape2)
 library(printr)
 
@@ -205,8 +208,10 @@ resumo[,2:ncol(resumo)] <- round(resumo[,2:ncol(resumo)],4)
 resumo
 ```
 
-```{r boxplots,echo = FALSE}
+
+```{r boxplots,echo = FALSE,eval=FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
+#eval= FALSE faz com que o R ignore este chunk
 
 # !!!acho que boxplots não são nescessários neste caso, já que temos todas as variáveis contínuas (ou discretas), ou seja, nenhum fator!!!
 
@@ -215,6 +220,8 @@ ggplot(df, aes(x = variable, y =  value)) +
   geom_boxplot() +
   facet_wrap(~variable, scales = "free") +  theme_bw()
 ```
+
+Dado a natureza quantitativa dos dados, é de grande interesse que identifiquemos as relações entre as covariáveis explicativas e a variável resposta, a fim de tornar essas relações visuais, foi construido graficos de dispersão entre a variável resposta e entre todas as covariáveis de interesse:
 
 ```{r dispersao,echo = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -226,23 +233,50 @@ ggplot(dispersao, aes(x = value, y =  expvida)) +
   facet_wrap(~variable, scales = "free") +  theme_bw()
 ```
 
+A partir da FiguraXX acima, podemos identificar visualmente a relação supracitada, a qual identificamos que todas as covariáveis parecem ter uma relação linear significativa, em especial, identificamos uma "forte"(mudar isso kkk) relação linear negativa da variável resposta com as covariáveis "analf" e "crime", assim como uma significativa relação linear positiva da variável resposta com as covariáveis "percap","estud","ndias" e "dens" (a menos a um ponto).
 
 
 
-```{r modelo,echo = FALSE}
+#Análise Inferêncial
+
+
+```{r padronizacao,echo = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 
 #Padronizacao dos dados
 dados[,c(1:ncol(dados))] =  sapply(dados[,c(1:ncol(dados))], function(x) (x-mean(x))/sd(x))
 
+```
+
+Dada a existência de relações lineares entre a variável resposta e todas as covariáveis explicativas e visando poder comparar os coeficiêntes de diferentes tipos de unidades de dados optamos por iniciar a análise com o seguinte modelo:
+
+Modelo:
+$$
+Y_i = \beta_0 + \sum_{j=1}^{6}\beta_j \left (\frac{x_{ji}-\bar{x_j}}{s_j}   \right ) + \varepsilon_{i}\left\{\begin{matrix}
+i= 1,\dots,50 \\ 
+j=  1,\dots,6
+\end{matrix}\right.
+$$
+em que  $\varepsilon_{i} \overset{i.i.d.}{\sim} N(0,\sigma^2)$ , $x_j=\frac{1}{50}\sum_{i=1}^{50}x_ji$ e  $s_j=\sqrt{\frac{1}{50}\sum_{i=1}^{50}(x_{ji}-\bar{x_j})^2}$
+
+$Y_i$ : Expectativa de vida em anos (1969-70).  
+de estudantes que concluem o segundo grau (1970)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+
+```{r modelo completo,echo = FALSE}
+#echo = FALSE não permite que o chunk apareça no pdf
+
 #modelo padronizado completo
 fitmax <- lm(expvida~percap+analf+crime+estud+ndias+dens,data=dados)
 summary(fitmax)
+```
+
+
+```{r modelo intercepto,echo = FALSE}
+#echo = FALSE não permite que o chunk apareça no pdf
 
 #modelo padronizado só com o intercepto
 fitmin <- lm(expvida~1,data = dados)
-summary(fitmin)
 ```
 
 
@@ -262,12 +296,21 @@ diag2norm(fitmax)
 envelnorm(fitmax)
 ```
 
+#Seleção dos modelos
 
-```{r stepwise,echo = FALSE}
+Dada a natureza dos dados 
+```{r stepwisemin,echo = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #seleção stepwise começando do modelo min (modelo só com o intercepto)
 step_min <- step(fitmin,scope = list(upper=fitmax),direction = "both")
+```
+
+
+
+```{r stepwisemax,echo = FALSE}
+#echo = FALSE não permite que o chunk apareça no pdf
+
 
 #seleção stepwise começando do modelo max (modelo com todas as variaveis explicativas)
 step_max <- step(fitmax,scope = list(lower=fitmin),direction = "both")
@@ -284,9 +327,22 @@ Com base no stepwise, chegamos ao modelo com maior poder preditivo(expvida ~ cri
 
 fit_otimo <- lm(expvida ~ crime + estud + ndias + dens, data = dados)
 summary(fit_otimo)
+
 ```
 
+```{r residuos modelo otimo,echo = FALSE}
+#echo = FALSE não permite que o chunk apareça no pdf
 
+#grpaficos para análise de resíduos
+diag2norm(fit_otimo)
+```
+
+```{r envelope modelo otimo,echo = FALSE}
+#echo = FALSE não permite que o chunk apareça no pdf
+
+#gráfico de envelopes
+envelnorm(fit_otimo)
+```
 
 
 ```{r alavancagem,echo = FALSE}
