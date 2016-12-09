@@ -8,7 +8,7 @@ output: pdf_document
 #eval= FALSE faz com que o R ignore este chunk
 #echo = FALSE não permite que o chunk apareça no pdf
 
-pacotes = c("tidyverse","plyr","dplyr","reshape2")
+pacotes = c("tidyverse","plyr","dplyr","reshape2","knitr")
 install.packages(pacotes)
 ```
 
@@ -162,8 +162,20 @@ plot(di,xlab="Índice", ylab="Distância de Cook", pch=16,cex=1.1,cex.axis=1.1,c
 }
 ```
 
+#Introdução
 
-
+Este presente trabalho é parte do escopo da disciplina ME613 - Regressão Linear e visa a aplicação dos conhecimentos adquiridos em sala de aula. Grande parte do trabalho foi baseado e adaptado a partir dos materiais disponibilizados na página do curso: [http://www.ime.unicamp.br/~cnaber/Material_ME613_2S_2016.htm]("http://www.ime.unicamp.br/~cnaber/Material_ME613_2S_2016.htm").  
+O conjunto de dados a ser analisado está disponível em na página do curso sob o nome "reg3.dat". Neste são  descritas as seguintes variáveis referentes a 50 estados norte-americanos: (i) **estado** (nome do estado), (ii) **pop** (população estimada em julho de 1975), (iii) **percap** (renda percapita em 1974 em USD), (iv) **analf** (proporção de analfabetos em 1970), (v) **expvida** (expectativa de vida em anos 1969-70), (vi) **crime** (taxa de criminalidade por 100000 habitantes 1976), (vii) **estud** (porcentagem de estudantes que concluem o segundo grau 1970), (viii) **ndias** (número de dias do ano com temperatura abaixo de zero grau Celsus na cidade mais importante do estado) e (ix) **area** (área do estado em milhas quadradas). O objetivo do estudo é tentar explicar a variável **expvida** usando um modelo de regressão normal linear dadas as variáveis explicativas **percap**, **analf**, **crime**, **estud**, **ndias** e **dens**, em que **dens**=pop/area (densidade da população estimada em julho de 1975 por área do estado em milhas quadradas).  
+Todos os modelos neste trabalho foram ajustados via metodologia de mínimos quadrados ordinários, veja Azevedo (2016), e todas suas respectivas análises residuais foram realizadas, conforme Paula (2013).
+A menos que seja citado o contrário, todas as variáveis que constam na base de dados serão referidas por sua descrição completa ou pelo nome que consta no banco de dados (estes foram supracitados em negrito). Denotaremos também:
+  
+$Y_i$ - i-ésima observação da variável expvida  
+$x_{1i}$ - i-esima observação da variável percap  
+$x_{2i}$ - i-esima observação da variável analf  
+$x_{3i}$ - i-esima observação da variável crime  
+$x_{4i}$ - i-esima observação da variável estud  
+$x_{5i}$ - i-esima observação da variável ndias  
+$x_{6i}$ - i-esima observação da variável dens  
 
 
 
@@ -221,7 +233,7 @@ ggplot(df, aes(x = variable, y =  value)) +
   facet_wrap(~variable, scales = "free") +  theme_bw()
 ```
 
-Dado a natureza quantitativa dos dados, é de grande interesse que identifiquemos as relações entre as covariáveis explicativas e a variável resposta, a fim de tornar essas relações visuais, foi construido graficos de dispersão entre a variável resposta e entre todas as covariáveis de interesse:
+Dado a natureza quantitativa dos dados, é de grande interesse que identifiquemos as relações entre as covariáveis explicativas e a variável resposta, a fim de tornar essas relações visuais, foi construido graficos de dispersão entre a variável resposta e entre todas as covariáveis de interesse. Estes estão representados na figura XX. 
 
 ```{r dispersao,echo = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -233,7 +245,7 @@ ggplot(dispersao, aes(x = value, y =  expvida)) +
   facet_wrap(~variable, scales = "free") +  theme_bw()
 ```
 
-A partir da FiguraXX acima, podemos identificar visualmente a relação supracitada, a qual identificamos que todas as covariáveis parecem ter uma relação linear significativa, em especial, identificamos uma "forte"(mudar isso kkk) relação linear negativa da variável resposta com as covariáveis "analf" e "crime", assim como uma significativa relação linear positiva da variável resposta com as covariáveis "percap","estud","ndias" e "dens" (a menos a um ponto).
+A partir da FiguraXX, podemos identificar visualmente a relação supracitada, a qual identificamos que todas as covariáveis parecem ter uma relação linear significativa, as quais existem relações lineares negativas entre a variável resposta e as covariáveis "analf" e "crime", assim como relações lineares negativas entre a variável resposta "expvida" e as covariáveis "percap","estud","ndias" e "dens" (a menos a um ponto).
 
 
 
@@ -249,9 +261,9 @@ dados[,c(1:ncol(dados))] =  sapply(dados[,c(1:ncol(dados))], function(x) (x-mean
 
 ```
 
-Dada a existência de relações lineares entre a variável resposta e todas as covariáveis explicativas e visando poder comparar os coeficiêntes de diferentes tipos de unidades de dados optamos por iniciar a análise com o seguinte modelo:
+Dada a constatação visual de relações lineares entre a variável resposta "expvida" e todas as covariáveis explicativas, é razoável iniciar um modelo que contemple todas estas covariáveis. Visando poder comparar diretamente os coeficiêntes do modelo, optamos por introduzir as covariáveis com médias e variâncias iguais, tornardo-as adimensionais. Portanto, vamos iniciar a análise com o seguinte modelo:
 
-Modelo:
+Modelo: !!!note que pode-se resumir a interpretação de $B_j/s_j$ caso precise de espeço!!!
 $$
 Y_i = \beta_0 + \sum_{j=1}^{6}\beta_j \left (\frac{x_{ji}-\bar{x_j}}{s_j}   \right ) + \varepsilon_{i}\left\{\begin{matrix}
 i= 1,\dots,50 \\ 
@@ -261,23 +273,24 @@ $$
 em que  $\varepsilon_{i} \overset{i.i.d.}{\sim} N(0,\sigma^2)$ , $x_j=\frac{1}{50}\sum_{i=1}^{50}x_ji$ e  $s_j=\sqrt{\frac{1}{50}\sum_{i=1}^{50}(x_{ji}-\bar{x_j})^2}$
 
 $Y_i$ : Expectativa de vida em anos (1969-70).  
+$\beta_0$ : Expectativa de vida esperada em anos (1969-70) para valores de covariáveis iguais às suas respectivas médias.  
+$\frac{\beta_1}{s_1}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "renda percapita (em 1974 em USD)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+$\frac{\beta_2}{s_2}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "proporção de analfabetos (em 1970)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+$\frac{\beta_3}{s_3}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "taxa de criminalidade (por 100000 habitantes 1976)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+$\frac{\beta_4}{s_4}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "porcentagem
 de estudantes que concluem o segundo grau (1970)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+$\frac{\beta_5}{s_5}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor de "número de dias do ano com temperatura abaixo de zero grau Celsus na cidade mais importante do estado" em uma unidade, mantendo-se as demais covariáveis fixas.  
+$\frac{\beta_6}{s_6}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "densidade da população estimada em julho de 1975 por área do estado em milhas quadradas" em uma unidade, mantendo-se as demais covariáveis fixas.  
 
 ```{r modelo completo,echo = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #modelo padronizado completo
 fitmax <- lm(expvida~percap+analf+crime+estud+ndias+dens,data=dados)
-summary(fitmax)
 ```
+Pode-se observar a partir das figuras XX e XX que o modelo não teve um ajuste adequado, uma vez que se é possível observar uma assimetria positiva no histograma apresentado (gráfico YY da figura XX), assim como uma tendencia no gráfico de envelopes (figura XX) o que nos dá indícios de falta de normalidade nos resíduos. **!!!eu não identifiquei heterocedasticidade, se alguem achar que têm, escreva algum argumento!!!**. Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimetrica. Dado o escopo do curso, procede-se com as análises posteriores.
 
 
-```{r modelo intercepto,echo = FALSE}
-#echo = FALSE não permite que o chunk apareça no pdf
-
-#modelo padronizado só com o intercepto
-fitmin <- lm(expvida~1,data = dados)
-```
 
 
 ```{r residuos,echo = FALSE}
@@ -295,11 +308,33 @@ diag2norm(fitmax)
 #gráfico de envelopes
 envelnorm(fitmax)
 ```
+Note, pela tabela XX que somente os parêmetros relacionados às covariáveis "crime", "ndias" e "dens" significativos à um nível de significancia =0,10. A partir desse resultado, temos a indicação de que um modelo reduzido pode ser mais apropriado. Contudo, desejamos também, obter o modelo que melhor se ajusta aos dados.
+
+```{r}
+#pacote para produzir tabela em latex
+library(knitr)
+
+# !!! depois editar!!!
+#coeficientes e R^2 e R^2 ajustado
+R2fitmax <- summary(fitmax)$r.squared
+R2fitmax
+R2aj_fitmax <- summary(fitmax)$adj.r.squared
+R2aj_fitmax
+kable(summary(fitmax)$coefficients)
+
+```
 
 #Seleção dos modelos
+A técnica escolhida para nos auxiliar a selecionar o modelo normal linear homocedastico que melhor se ajusta aos dados foi a técnica stepwise, veja Azevedo (2016).
 
-Dada a natureza dos dados 
-```{r stepwisemin,echo = FALSE}
+```{r modelo intercepto,echo = FALSE}
+#echo = FALSE não permite que o chunk apareça no pdf
+
+#modelo padronizado só com o intercepto
+fitmin <- lm(expvida~1,data = dados)
+```
+
+```{r stepwisemin,echo = FALSE,eval=TRUE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #seleção stepwise começando do modelo min (modelo só com o intercepto)
@@ -308,7 +343,7 @@ step_min <- step(fitmin,scope = list(upper=fitmax),direction = "both")
 
 
 
-```{r stepwisemax,echo = FALSE}
+```{r stepwisemax,echo = FALSE,eval=TRUE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 
@@ -317,8 +352,26 @@ step_max <- step(fitmax,scope = list(lower=fitmin),direction = "both")
 ```
 
 
-Com base no stepwise, chegamos ao modelo com maior poder preditivo(expvida ~ crime + estud + ndias + dens):
+A aplicação da metodologia stepwise, començando com o modelo só
+com o intercepto ou começando com o modelo completo, indicou,
+em ambos os casos que o modelo com que melhor se ajusta é o modelo que leva em consideração somente as covariáveis "crime","estud","ndias" e "dens".
 
+Temos agora o seguinte modelo:
+
+$$
+Y_i = \beta_0 + \sum_{j=3}^{6}\beta_j \left (\frac{x_{ji}-\bar{x_j}}{s_j}   \right ) + \varepsilon_{i}\left\{\begin{matrix}
+i= 1,\dots,50 \\ 
+j=  3,\dots,6
+\end{matrix}\right.
+$$
+em que  $\varepsilon_{i} \overset{i.i.d.}{\sim} N(0,\sigma^2)$ , $x_j=\frac{1}{50}\sum_{i=1}^{50}x_ji$ e  $s_j=\sqrt{\frac{1}{50}\sum_{i=1}^{50}(x_{ji}-\bar{x_j})^2}$
+
+$Y_i$ : Expectativa de vida em anos (1969-70).  
+$\beta_0$ : Expectativa de vida esperada em anos (1969-70) para valores de covariáveis iguais às suas respectivas médias.  
+$\frac{\beta_3}{s_3}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "taxa de criminalidade (por 100000 habitantes 1976)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+$\frac{\beta_4}{s_4}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "porcentagem de estudantes que concluem o segundo grau (1970)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+$\frac{\beta_5}{s_5}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor de "número de dias do ano com temperatura abaixo de zero grau Celsus na cidade mais importante do estado" em uma unidade, mantendo-se as demais covariáveis fixas.  
+$\frac{\beta_6}{s_6}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "densidade da população estimada em julho de 1975 por área do estado em milhas quadradas" em uma unidade, mantendo-se as demais covariáveis fixas.
 
 ```{r Modelo Otimo,echo = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -326,9 +379,10 @@ Com base no stepwise, chegamos ao modelo com maior poder preditivo(expvida ~ cri
 #modelo "ótimo" segundo o stepwise
 
 fit_otimo <- lm(expvida ~ crime + estud + ndias + dens, data = dados)
-summary(fit_otimo)
-
 ```
+
+Em anuência ao ajuste do modelo anterior, este modelo também não apresentou um ajuste adequado, uma vez que se observa nas figuras YY XX indícios de mal ajuste semelhantes aos observados na análise residual para o modelo anterior. **!!! alguém identificou algum problema a mais??? argumentar aqui!!!** 
+Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimetrica. Novamente, dado o escopo do curso, procede-se com as análises posteriores.
 
 ```{r residuos modelo otimo,echo = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -345,6 +399,41 @@ envelnorm(fit_otimo)
 ```
 
 
+
+
+
+
+```{r}
+#coeficientes modelo otimo
+
+#!!!Editar essa tabela!!!
+
+R2fit_otimo <- summary(fit_otimo)$r.squared
+R2fit_otimo
+R2aj_fit_otimo <- summary(fit_otimo)$adj.r.squared
+R2aj_fit_otimo
+kable(summary(fit_otimo)$coefficients)
+```
+
+#Multicolinearidade
+
+Mesmo o modelo não apresentando muitas covariáveis, é interessante, a fim de assegurar a validade dos resultados obtidos (desconsidere que o modelo não teve um bom ajuste), verificar também a possibilidade de se ter multicolinearidade presente no modelo ajustado. Com o propósito de identificar alguma indicação de multicolinearidade no modelo, podemos análisar os coeficiêntes de corelação linear entre as covariáveis "crime", "estud", "ndias" e "dens". Porém, observamos na tabela XX (abaixo) que nenhum par de covariáveis apresenta coeficiente de correlação deveras alto. Este fato, somado ao fato das covariáveis presentes no medelo não apresentarem nenhum indício de serem fontes de multicolinearidade, descartamos então, a hipótese de presença de multicolinearidade no modelo.
+
+
+```{r}
+#Análise de multicolineariedade descritivamente
+
+#pegando só as variáveis do modelo otimo
+dados_modelo_otimo <- dados[,3:6]
+cor(dados_modelo_otimo)
+
+```
+
+
+
+#Alavancagem
+
+Observando a figura XX podemos identificar a existência de pontos distantes dos demais, o que é uma indicação de ............. **!!!escrever explicaçõs, identificar os pontos e depois ajustar modelos sem estes pontos e compara-los via AIC e BIC!!!**
 ```{r alavancagem,echo = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
