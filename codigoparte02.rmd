@@ -4,29 +4,80 @@ date: "6 de dezembro de 2016"
 output: pdf_document
 ---
 
-```{r pacotes,eval=FALSE,echo=FALSE}
+```{r pacotes,cache = TRUE,echo=FALSE, warning = FALSE, error = FALSE}
 #eval= FALSE faz com que o R ignore este chunk
 #echo = FALSE não permite que o chunk apareça no pdf
 
-pacotes = c("tidyverse","plyr","dplyr","reshape2","knitr")
-install.packages(pacotes)
+#pacotes = c("tidyverse","plyr","dplyr","reshape2","knitr")
+#install.packages(pacotes)
+
+# pacote utiliado para gráficos
+library(ggplot2)
+# pacote que deixa os gráficos do ggplot lado a lado
+library(gridExtra)
+# pacotes para manipulação de dados
+library(reshape2)
+library(plyr)
+library(dplyr)
+#pacote que possui o conjunto de dados para o primeiro exercício
+library(car)
+#pacote para fazer legenda
+library(captioner)
+
+
+
+figs <- captioner(prefix="Figura")
+tbls <- captioner(prefix="Tabela")
+
+#inslação dos pacotes necessários
+#install.packages(C("tidyverse","gridExtra","car","captioner","gvlma"))
+
+#instalacao de um pacote pra "printar" tabelas mais bonitinhas
+#install.packages(
+#  'printr',
+#  type = 'source',
+#  repos = c('http://yihui.name/xran', 'http://cran.rstudio.com')
+#)
+
+```
+
+```{r legendas, echo=FALSE, cache=TRUE}
+#legenda para as tabelas
+
+# legenda para a primeira tabela(estats descr) do primeiro exercício
+legenda_table1 = tbls(name="table_estat_descr1",caption = "Estatísticas Descritivas")
+legenda_table2 = tbls(name="table_esti_testedenulidade",caption = "Estimativas dos parâmetros, intervalo de confiança e teste de nulidade")
+
+
+#legendas para os gráficos
+
+#legenda para o primeiro Boxplot
+legenda_graf1 = figs(name="graf1_boxplot",caption = "Boxplot Comparativo")
+#legenda para o primeiro grárico de dispersão
+legenda_graf2 = figs(name="graf2_dispersao",caption = "Dispersão entre as variáveis Altura e Peso")
+legenda_graf3 = figs(name="graf3_dispersao",caption = "Dispersão entre as variáveis Altura e Peso considerando o sexo.")
+legenda_graf4 = figs(name="graf4_analiseresidual",caption = "Análise residual para o modelo 1")
+legenda_graf5 = figs(name="graf5_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 1")
+legenda_graf6 = figs(name="graf6_analiseresidual",caption = "Análise residual para o modelo 2")
+legenda_graf7 = figs(name="graf7_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 2")
+legenda_graf8 = figs(name="graf8_analiseresidual",caption = "Análise residual para o modelo 3")
+legenda_graf9 = figs(name="graf9_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 3")
+legenda_graf10 = figs(name="graf10_analiseresidual",caption = "Análise residual para o modelo 4")
+legenda_graf11 = figs(name="graf11_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 4")
+
 ```
 
 
-```{r Funcoes,echo=FALSE}
+
+
+```{r Funcoes,echo=FALSE,warning=FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
-
-
 #Função que produz os quatro gráficos para a análise de resíduos
-
-
-
 diag2norm<-function(fit.model){
 # fit.model: objeto com o ajuste do modelo normal linear homocedástico 
 # obtido através da função "lm"
 
-par(mfrow=c(2,2))
 X <- model.matrix(fit.model)
 n <- nrow(X)
 p <- ncol(X)
@@ -39,88 +90,72 @@ ts <- r/(s*sqrt(1-h))
 di <- (1/p)*(h/(1-h))*(ts^2)
 si <- lm.influence(fit.model)$sigma
 tsi <- r/(si*sqrt(1-h))
+tam <- 1:length(tsi)
 a <- max(tsi)
 b <- min(tsi)
-par(mfrow=c(2,2))
-#
-plot(tsi,xlab="Índice", ylab="Resíduo Studentizado",
-ylim=c(b-1,a+1), pch=16,cex=1.1,cex.axis=1.1,cex.lab=1.1)
-abline(2,0,lty=2)
-abline(-2,0,lty=2)
-abline(0,0,lty=2)
-#identify(tsi, n=1)
-#title(sub="(c)")
-#
-plot(fitted(fit.model),tsi,xlab="Valores Ajustados", 
-ylab="Resíduo Studentizado", ylim=c(b-1,a+1), pch=16,cex=1.1,cex.axis=1.1,cex.lab=1.1)
-#
-abline(2,0,lty=2)
-abline(-2,0,lty=2)
-abline(0,0,lty=2)
-#boxplot(tsi,ylab="Resíduo Studentizado",cex=1.1,cex.axis=1.1,cex.lab=1.1)
-hist(tsi,xlab="Resíduo Studentizado",ylab="densidade",probability=TRUE,main="",cex=1.1,cex.axis=1.1,cex.lab=1.1)
-#title(sub="(d)")
-#identify(fitted(fit.model),tsi, n=1)
-#
-boxplot(tsi,ylab="Resíduo Studentizado",cex=1.1,cex.axis=1.1,cex.lab=1.1)
 
+g1 = ggplot(data=data.frame(tam,tsi),aes(tam,tsi))+ geom_point() +scale_y_continuous(name = "Resíduo Studentizado",limits=c(b-1,a+1)) +scale_x_continuous(name = "Índice")+labs(title="A")+geom_hline(yintercept=0,size=0.25,linetype=2)+geom_hline(yintercept=2,size=0.25,linetype=2)+geom_hline(yintercept=-2,size=0.25,linetype=2)+theme_light()
+
+g2 =  ggplot(data=data.frame(fitted(fit.model),tsi),aes(fitted(fit.model),tsi))+ geom_point() +scale_y_continuous(name = "Resíduo Studentizado",limits=c(b-1,a+1)) +scale_x_continuous(name = "Valores Ajustados")+labs(title="A")+geom_hline(yintercept=0,size=0.25,linetype=2)+geom_hline(yintercept=2,size=0.25,linetype=2)+geom_hline(yintercept=-2,size=0.25,linetype=2)+theme_light()
+
+#Histograma
+g3 = ggplot(data=data.frame(tsi),aes(tsi,col=I("black"),fill=I("white")))+geom_histogram(binwidth = 1,aes(y=..density..))+labs(title="C",x="Resíduo Studentizado",y="Densidade")+theme_light()
+
+#Boxplot
+g4 = ggplot(data=data.frame(fac = factor(1),tsi),aes(fac,tsi,col=I("black"),fill=I("white")))+ geom_boxplot(outlier.size = 2.5, outlier.colour = "red",width=0.4)+scale_x_discrete(name="")+scale_y_continuous(name = "Residuo Studentizado")+theme(axis.text.x = element_blank())+theme_light()
+
+#funcao que une todos os gráficos
+grid.arrange(g1,g2,g3,g4,ncol=2,nrow=2)
 #---------------------------------------------------------------#
+
 }
 
+# Programa extraído do site: https://www.ime.usp.br/~giapaula/textoregressao.htm
+# Créditos: Prof. Dr. Gilberto Alvarenga Paula
+# Adaptado por Caio L. N. Azevedo e Henrique Capatto
 
+envelnorm<-function(fit.model){  
+# argumento: modelo de regressão linear homocedástico ajustado
+# Eu adaptei uma função que achei na net com o que o Caio fez nos grafs de envelope. Agradeçam a um desconhecido.  
 
-
-
-#função para fazer o gráfico de envelopes
-
-
-
-
-envelnorm<-function(fit.model){
-# fit.model: objeto com o ajuste do modelo normal linear homocedástico 
-# obtido através da função "lm"
-
-#par(mfrow=c(1,1))
-X <- model.matrix(fit.model)
-n <- nrow(X)
-p <- ncol(X)
-H <- X%*%solve(t(X)%*%X)%*%t(X)
-h <- diag(H)
-si <- lm.influence(fit.model)$sigma
-r <- resid(fit.model)
-tsi <- r/(si*sqrt(1-h))
-#
-ident <- diag(n)
-epsilon <- matrix(0,n,100)
-e <- matrix(0,n,100)
-e1 <- numeric(n)
-e2 <- numeric(n)
-#
-for(i in 1:100){
-     epsilon[,i] <- rnorm(n,0,1)
-     e[,i] <- (ident - H)%*%epsilon[,i]
-     u <- diag(ident - H)
-     e[,i] <- e[,i]/sqrt(u)
-     e[,i] <- sort(e[,i]) }
-#
-for(i in 1:n){
-     eo <- sort(e[i,])
-     e1[i] <- (eo[2]+eo[3])/2
-     e2[i] <- (eo[97]+eo[98])/2 }
-#
-med <- apply(e,1,mean)
-faixa <- range(tsi,e1,e2)
-#
-#par(pty="s")
-qqnorm(tsi,xlab="Percentil da N(0,1)",
-ylab="Residuo Studentizado", ylim=faixa, pch=16, main="",cex=1.1,cex.axis=1.1,cex.lab=1.1)
-par(new=T)
-qqnorm(e1,axes=F,xlab="",ylab="",type="l",ylim=faixa,lty=1, main="")
-par(new=T)
-qqnorm(e2,axes=F,xlab="",ylab="", type="l",ylim=faixa,lty=1, main="")
-par(new=T)
-qqnorm(med,axes=F,xlab="",ylab="",type="l",ylim=faixa,lty=2, main="")
-#------------------------------------------------------------#
+  
+  
+    X <- model.matrix(fit.model)
+    n <- nrow(X)
+    p <- ncol(X)
+    H <- X%*%solve(t(X)%*%X)%*%t(X)
+    h <- diag(H)
+    si <- lm.influence(fit.model)$sigma
+    r <- resid(fit.model)
+    tsi <- r/(si*sqrt(1-h))
+    #
+    ident <- diag(n)
+    epsilon <- matrix(0,n,100)
+    e <- matrix(0,n,100)
+    e1 <- numeric(n)
+    e2 <- numeric(n)
+    #
+    for(i in 1:100){
+        epsilon[,i] <- rnorm(n,0,1)
+        e[,i] <- (ident - H)%*%epsilon[,i]
+        u <- diag(ident - H)
+        e[,i] <- e[,i]/sqrt(u)
+        e[,i] <- sort(e[,i]) }
+    #
+    for(i in 1:n){
+        eo <- sort(e[i,])
+        e1[i] <- (eo[2]+eo[3])/2
+        e2[i] <- (eo[97]+eo[98])/2 }
+  
+  
+    y <- quantile(tsi[!is.na(tsi)], c(0.25, 0.75))
+    x <- qnorm(c(0.25, 0.75))
+    slope <- diff(y)/diff(x)
+    int <- y[1L] - slope * x[1L]
+  
+    d <- data.frame(resids = tsi)
+  
+    ggplot(d, aes(sample = resids))+stat_qq()+stat_qq(aes(sample=e1),geom="line")+stat_qq(aes(sample=e2),geom="line")+ geom_abline(slope = slope, intercept = int,linetype = 3)+labs(x="Percentil da N(0,1)",y="Residuo Studentizado",title="E")+theme_light()
 }
 
 
@@ -160,6 +195,30 @@ plot(di,xlab="Índice", ylab="Distância de Cook", pch=16,cex=1.1,cex.axis=1.1,c
 #
 #------------------------------------------------------------#
 }
+
+anainflu_ind = function(fit.model){ 
+# fit.model: objeto com o ajuste do modelo normal linear homocedástico 
+# obtido através da função "lm"
+X <- model.matrix(fit.model)
+n <- nrow(X)
+p <- ncol(X)
+H <- X%*%solve(t(X)%*%X)%*%t(X)
+h <- diag(H)
+lms <- summary(fit.model)
+s <- lms$sigma
+r <- resid(lms)
+ts <- r/(s*sqrt(1-h))
+di <- (1/p)*(h/(1-h))*(ts^2)
+
+maxh = as.integer(which.max(h))
+
+maxdi = as.integer(which(di > 0.15))
+
+maxs = list(maxh,as.double(h[maxh]),maxdi[1],maxdi[2],as.double(di[maxdi][1]),as.double(di[maxdi][2]))
+
+return(maxs)
+}
+
 ```
 
 #Introdução
@@ -179,7 +238,7 @@ $x_{6i}$ - i-esima observação da variável dens
 
 
 
-```{r leitura,echo = FALSE}
+```{r leitura,echo = FALSE,warning=FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 library(plyr)
 library(tidyverse)
@@ -286,14 +345,32 @@ $\frac{\beta_6}{s_6}$ : Incremento (positivo ou negativo) na expectativa de vida
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #modelo padronizado completo
-fitmax <- lm(expvida~percap+analf+crime+estud+ndias+dens,data=dados)
+fitmax <- lm(expvida~+percap+analf+crime+estud+ndias+dens,data=dados)
+
+res_fit_max = summary(fitmax)
+coeff_fit_max = res_fit_max$coefficients
+coeff_fit_max = data.frame(round(as.double(coeff_fit_max[,1]),4),round(as.double(coeff_fit_max[,2]),4),round(as.double(coeff_fit_max[,3]),4),ifelse(as.double(coeff_fit_max[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_max[,4]),4)))
+
+names(coeff_fit_max)=c("Estimativa","EP","Valor T","Valor p")
+
+# Estatísticas para comparação de modelos
+medidas_fit_max = data.frame(rbind(AIC(fitmax),BIC(fitmax),logLik(fitmax)))
+colnames(medidas_fit_max)=c("Modelo 1")
+rownames(medidas_fit_max)=c("AIC","BIC","Log-Verossimilhança")
+
+
+
+mm_max = as.matrix(model.matrix(fitmax))
+
+
+
 ```
 Pode-se observar a partir das figuras XX e XX que o modelo não teve um ajuste adequado, uma vez que se é possível observar uma assimetria positiva no histograma apresentado (gráfico YY da figura XX), assim como uma tendencia no gráfico de envelopes (figura XX) o que nos dá indícios de falta de normalidade nos resíduos. **!!!eu não identifiquei heterocedasticidade, se alguem achar que têm, escreva algum argumento!!!**. Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimetrica. Dado o escopo do curso, procede-se com as análises posteriores.
 
 
 
 
-```{r residuos,echo = FALSE}
+```{r residuos,echo = FALSE,warning = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 # !!!acho que seria mais produtivo fazer análise de resíduos apenas para o modelo completo!!!
@@ -302,7 +379,7 @@ Pode-se observar a partir das figuras XX e XX que o modelo não teve um ajuste a
 diag2norm(fitmax)
 ```
 
-```{r envelope,echo = FALSE}
+```{r envelope,echo = FALSE,warning = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #gráfico de envelopes
@@ -334,21 +411,22 @@ A técnica escolhida para nos auxiliar a selecionar o modelo normal linear homoc
 fitmin <- lm(expvida~1,data = dados)
 ```
 
-```{r stepwisemin,echo = FALSE,eval=TRUE}
+```{r stepwisemin,echo = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #seleção stepwise começando do modelo min (modelo só com o intercepto)
 step_min <- step(fitmin,scope = list(upper=fitmax),direction = "both")
+
 ```
 
 
-
-```{r stepwisemax,echo = FALSE,eval=TRUE}
+```{r stepwisemax,echo = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 
 #seleção stepwise começando do modelo max (modelo com todas as variaveis explicativas)
 step_max <- step(fitmax,scope = list(lower=fitmin),direction = "both")
+
 ```
 
 
@@ -379,19 +457,32 @@ $\frac{\beta_6}{s_6}$ : Incremento (positivo ou negativo) na expectativa de vida
 #modelo "ótimo" segundo o stepwise
 
 fit_otimo <- lm(expvida ~ crime + estud + ndias + dens, data = dados)
+
+res_fit_otimo= summary(fit_otimo)
+coeff_fit_otimo= res_fit_otimo$coefficients
+coeff_fit_otimo= data.frame(round(as.double(coeff_fit_otimo[,1]),4),round(as.double(coeff_fit_otimo[,2]),4),round(as.double(coeff_fit_otimo[,3]),4),ifelse(as.double(coeff_fit_otimo[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_otimo[,4]),4)))
+
+names(coeff_fit_otimo)=c("Estimativa","EP","Valor T","Valor p")
+
+# Estatísticas para comparação de modelos
+medidas_fit_otimo = data.frame(rbind(AIC(fit_otimo),BIC(fit_otimo),logLik(fit_otimo)))
+colnames(medidas_fit_otimo)=c("Modelo 2")
+rownames(medidas_fit_otimo)=c("AIC","BIC","Log-Verossimilhança")
+
+mm = as.matrix(model.matrix(fit_otimo))
 ```
 
 Em anuência ao ajuste do modelo anterior, este modelo também não apresentou um ajuste adequado, uma vez que se observa nas figuras YY XX indícios de mal ajuste semelhantes aos observados na análise residual para o modelo anterior. **!!! alguém identificou algum problema a mais??? argumentar aqui!!!** 
 Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimetrica. Novamente, dado o escopo do curso, procede-se com as análises posteriores.
 
-```{r residuos modelo otimo,echo = FALSE}
+```{r residuos modelo otimo,echo = FALSE,warning=FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #grpaficos para análise de resíduos
 diag2norm(fit_otimo)
 ```
 
-```{r envelope modelo otimo,echo = FALSE}
+```{r envelope modelo otimo,echo = FALSE,warning=FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #gráfico de envelopes
@@ -399,19 +490,13 @@ envelnorm(fit_otimo)
 ```
 
 
-
-
-
-
-```{r}
+```{r,echo=FALSE}
 #coeficientes modelo otimo
 
 #!!!Editar essa tabela!!!
 
 R2fit_otimo <- summary(fit_otimo)$r.squared
-R2fit_otimo
 R2aj_fit_otimo <- summary(fit_otimo)$adj.r.squared
-R2aj_fit_otimo
 kable(summary(fit_otimo)$coefficients)
 ```
 
@@ -420,20 +505,30 @@ kable(summary(fit_otimo)$coefficients)
 Mesmo o modelo não apresentando muitas covariáveis, é interessante, a fim de assegurar a validade dos resultados obtidos (desconsidere que o modelo não teve um bom ajuste), verificar também a possibilidade de se ter multicolinearidade presente no modelo ajustado. Com o propósito de identificar alguma indicação de multicolinearidade no modelo, podemos análisar os coeficiêntes de corelação linear entre as covariáveis "crime", "estud", "ndias" e "dens". Porém, observamos na tabela XX (abaixo) que nenhum par de covariáveis apresenta coeficiente de correlação deveras alto. Este fato, somado ao fato das covariáveis presentes no medelo não apresentarem nenhum indício de serem fontes de multicolinearidade, descartamos então, a hipótese de presença de multicolinearidade no modelo.
 
 
-```{r}
+```{r,echo=FALSE}
 #Análise de multicolineariedade descritivamente
 
 #pegando só as variáveis do modelo otimo
 dados_modelo_otimo <- dados[,3:6]
 cor(dados_modelo_otimo)
 
+#Verificação dos autovalores
+
+autval <- eigen(t(mm) %*% mm)$values
+indcond <- max(autval)/min(autval)
+
+
 ```
 
+Sabe-se que se a divisão $K=\frac{\lambda_{max}}{\lambda_{min}}$ for maior que mil, geralmente, há indicios de multicolinearidade. Fazendo isso para o caso do problema em questão, tem-se que: $K=$ `r indcond`. Como $K < 1000$, descartaremos a hipótese de multicolinearidade dos dados.
 
 
 #Alavancagem
 
-Observando a figura XX podemos identificar a existência de pontos distantes dos demais, o que é uma indicação de ............. **!!!escrever explicaçõs, identificar os pontos e depois ajustar modelos sem estes pontos e compara-los via AIC e BIC!!!**
+Observando a figura XX podemos identificar a existência de pontos distantes dos demais, o que é uma indicação de alavancagem.
+
+**!!!escrever explicaçõs, identificar os pontos e depois ajustar modelos sem estes pontos e compara-los via AIC e BIC!!!**
+
 ```{r alavancagem,echo = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
@@ -442,3 +537,111 @@ Observando a figura XX podemos identificar a existência de pontos distantes dos
 anainflu_norm(fit_otimo)
 ```
 
+
+
+```{r valores_alavancagem, echo=FALSE}
+valores = anainflu_ind(fit_otimo)
+
+indh = as.integer(valores[1])
+
+vh = as.double(valores[2])
+
+inddi1 = as.integer(valores[3])
+
+inddi2 = as.integer(valores[4])
+
+vdi1 = as.double(valores[5])
+
+vdi2 = as.double(valores[6])
+
+```
+
+Vemos para o gráfico de Medida h, o ponto que se destaca é o de indice `r indh`, com valor de `r vh`. Já no de Distânca de Cook, temos dois pontos em destaque: um é o do mesmo indice,com valor `r vdi2`, coomparações entre os valores das duas medidas não consistentes e portanto inválidas, outro ponto é o de indice `r inddi1`, com valor `r vdi1`.
+
+Logo, como identificamos esses pontos, vamos montar um modelo reduzido, como feito acima mas excluindo primeiramente as observações de indice 40 pois nos dois caso é o ponto mais elevado, possívelmente o que mais influência no modelo. caso ocorra uma melhora de ajuste, faremos para o outro identificado pela Distância de Cook.
+
+Segue abaixo o ajuste do modelo sem a observação 40
+
+```{r}
+
+fit_otimo_adj1 <- lm(expvida ~ crime + estud + ndias + dens, data = dados[-4,])
+
+
+res_fit_otimo_adj1 = summary(fit_otimo_adj1)
+coeff_fit_otimo_adj1 = res_fit_otimo_adj1$coefficients
+coeff_fit_otimo_adj1 = data.frame(round(as.double(coeff_fit_otimo_adj1[,1]),4),round(as.double(coeff_fit_otimo_adj1[,2]),4),round(as.double(coeff_fit_otimo_adj1[,3]),4),ifelse(as.double(coeff_fit_otimo_adj1[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_otimo_adj1[,4]),4)))
+
+names(coeff_fit_otimo_adj1)=c("Estimativa","EP","Valor T","Valor p")
+
+# Estatísticas para comparação de modelos
+medidas_fit_otimo_adj1 = data.frame(rbind(AIC(fit_otimo_adj1),BIC(fit_otimo_adj1),logLik(fit_otimo_adj1)))
+colnames(medidas_fit_otimo_adj1)=c("Modelo 3")
+rownames(medidas_fit_otimo_adj1)=c("AIC","BIC","Log-Verossimilhança")
+
+
+
+mm_adj1 = as.matrix(model.matrix(fit_otimo_adj1))
+```
+
+```{r residuos modelo otimo ajustado 1,echo = FALSE,warning=FALSE}
+#echo = FALSE não permite que o chunk apareça no pdf
+
+#grpaficos para análise de resíduos
+diag2norm(fit_otimo_adj1)
+```
+
+```{r envelope modelo otimo ajustado 1,echo = FALSE,warning=FALSE}
+#echo = FALSE não permite que o chunk apareça no pdf
+
+#gráfico de envelopes
+envelnorm(fit_otimo_adj1)
+```
+
+```{r}
+
+fit_otimo_adj2 <- lm(expvida ~ crime + estud + ndias + dens, data = dados[-c(11,40),])
+
+res_fit_otimo_adj2 = summary(fit_otimo_adj2)
+coeff_fit_otimo_adj2 = res_fit_otimo_adj2$coefficients
+coeff_fit_otimo_adj2 = data.frame(round(as.double(coeff_fit_otimo_adj2[,1]),4),round(as.double(coeff_fit_otimo_adj2[,2]),4),round(as.double(coeff_fit_otimo_adj2[,3]),4),ifelse(as.double(coeff_fit_otimo_adj2[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_otimo_adj2[,4]),4)))
+
+names(coeff_fit_otimo_adj1)=c("Estimativa","EP","Valor T","Valor p")
+
+# Estatísticas para comparação de modelos
+medidas_fit_otimo_adj2 = data.frame(rbind(AIC(fit_otimo_adj2),BIC(fit_otimo_adj2),logLik(fit_otimo_adj2)))
+colnames(medidas_fit_otimo_adj2)=c("Modelo 4")
+rownames(medidas_fit_otimo_adj2)=c("AIC","BIC","Log-Verossimilhança")
+
+
+
+mm_adj1 = as.matrix(model.matrix(fit_otimo_adj1))
+```
+
+```{r residuos modelo otimo ajustado 2,echo = FALSE,warning=FALSE}
+#echo = FALSE não permite que o chunk apareça no pdf
+
+#grpaficos para análise de resíduos
+diag2norm(fit_otimo_adj2)
+```
+
+```{r envelope modelo otimo ajustado 2,echo = FALSE,warning=FALSE}
+#echo = FALSE não permite que o chunk apareça no pdf
+
+#gráfico de envelopes
+envelnorm(fit_otimo_adj2)
+```
+
+
+
+
+```{r}
+
+medidas_comp_model = data.frame(medidas_fit_max,medidas_fit_otimo,medidas_fit_otimo_adj1,medidas_fit_otimo_adj2)
+
+
+
+```
+
+
+
+#Conclusões
