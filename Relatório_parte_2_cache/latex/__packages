@@ -6,3 +6,10 @@ plyr
 dplyr
 car
 captioner
+tidyverse
+tibble
+tidyr
+readr
+purrr
+printr
+knitr

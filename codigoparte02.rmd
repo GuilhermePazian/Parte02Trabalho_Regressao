@@ -1,8 +1,69 @@
 ---
-title: "trabalho Regressão parte 02"
-date: "6 de dezembro de 2016"
-output: pdf_document
+title: ""
+geometry: textwidth=18cm,textheight=21cm
+setspace: doublespacing
+lang: pt-br
+header-includes:
+- \usepackage{setspace}
+- \usepackage{indentfirst}
+- \usepackage[utf8]{inputenc}
+- \usepackage{mathptmx}
+- \usepackage{enumerate}
+- \usepackage{url} 
+- \usepackage{lipsum}
+output:
+  pdf_document:
+  html_document: default
+  fig_caption: yes
+  mainfont: Times New Roman
+  
+fontsize: 10pt
 ---
+
+\begin{titlepage}
+\begin{center}
+\thispagestyle{empty}
+\begin{figure}[!htb]
+\begin{center}
+\begin{minipage}[b]{0.5\linewidth}
+\begin{center}
+\includegraphics[width=100pt,height=150pt]{logo/logoimeccunicamp.png}
+\end{center}
+\end{minipage}
+\begin{minipage}[b]{0.7\linewidth}
+\begin{center}
+\vspace*{1cm}
+ {\large \bf Universidade Estadual de Campinas\\[5pt]
+Instituto de Matemática, Estatística e Computação Cientifica\\[3pt]
+Departamento de Estatística}
+\end{center}
+\end{minipage}
+\end{center}
+\end{figure}
+\vspace*{\stretch{1}}
+\begin{center}
+\vspace*{5cm}
+{\huge \bf Relatório - Parte II \\[7pt]
+Trabalho Final de ME613}
+\end{center}
+\vspace*{\stretch{1}}
+\begin{center}
+\vspace*{4cm}
+{\Large \bf Eliane Ramos de Siqueira  RA:155233 \\
+Guilherme Pazian  RA:160323 \\
+Henrique Capatto  RA:146406 \\
+Murilo Salgado Razoli  RA:150987 \break
+}\\[3pt]
+{\large \bf Professor: Caio Lucidius Naberezny Azevedo}\\[5pt]
+\end{center}
+\vspace*{\stretch{1}}
+\centerline{\bf Campinas-SP, 08 de Dezembro de 2016}
+\vspace*{\stretch{1}}
+\end{center}
+\end{titlepage}
+
+\onehalfspacing
+\newpage
 
 ```{r pacotes,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE, error = FALSE}
 #eval= FALSE faz com que o R ignore este chunk
@@ -46,25 +107,27 @@ tbls <- captioner(prefix="Tabela")
 
 # legenda para a primeira tabela(estats descr) do primeiro exercício
 legenda_table1 = tbls(name="table_estat_descr1",caption = "Estatísticas Descritivas")
-legenda_table2 = tbls(name="table_esti_testedenulidade",caption = "Estimativas dos parâmetros, intervalo de confiança e teste de nulidade")
-
+legenda_table2 = tbls(name="table_comparacao",caption = "Estimativas dos parâmetros, intervalo de confiança e teste de nulidade para o modelo 1")
+legenda_table3 = tbls(name="table_comparacao",caption = "Tabela de comparação")
+legenda_table4 = tbls(name="table_mult",caption = "Tabela dos coeficientes de correlação linear entre as covariáveis")
+legenda_table5 = tbls(name="table_comp",caption = "Tabela de Comparação")
 
 #legendas para os gráficos
 
 #legenda para o primeiro Boxplot
-legenda_graf1 = figs(name="graf1_boxplot",caption = "Boxplot Comparativo")
+legenda_graf1 = figs(name="graf1_dispersao",caption = "Gráficos de dispersão")
 #legenda para o primeiro grárico de dispersão
-legenda_graf2 = figs(name="graf2_dispersao",caption = "Dispersão entre as variáveis Altura e Peso")
-legenda_graf3 = figs(name="graf3_dispersao",caption = "Dispersão entre as variáveis Altura e Peso considerando o sexo.")
-legenda_graf4 = figs(name="graf4_analiseresidual",caption = "Análise residual para o modelo 1")
-legenda_graf5 = figs(name="graf5_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 1")
-legenda_graf6 = figs(name="graf6_analiseresidual",caption = "Análise residual para o modelo 2")
-legenda_graf7 = figs(name="graf7_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 2")
-legenda_graf8 = figs(name="graf8_analiseresidual",caption = "Análise residual para o modelo 3")
-legenda_graf9 = figs(name="graf9_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 3")
-legenda_graf10 = figs(name="graf10_analiseresidual",caption = "Análise residual para o modelo 4")
-legenda_graf11 = figs(name="graf11_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 4")
-
+legenda_graf2 = figs(name="graf2_residuos",caption = "Análise de Resíduo para o modelo 1")
+legenda_graf3 = figs(name="graf3_residuos",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 1")
+legenda_graf4 = figs(name="graf4_residuos",caption = "Análise residual para o modelo 2")
+legenda_graf5 = figs(name="graf5_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 2")
+legenda_graf6 = figs(name="graf6_analiseresidual",caption = "Análise residual para o modelo 3")
+legenda_graf7 = figs(name="graf7_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 3")
+legenda_graf8 = figs(name="graf8_analiseresidual",caption = "ESCOLHER LEGENDA")
+legenda_graf9 = figs(name="graf9_residuo",caption = "Gráfico de resíduos para o modelo 4 CONFERIR")
+legenda_graf10 = figs(name="graf10_envelope",caption = "Gráfico de envelope para o resíduos studentizado para OQUE? ")
+legenda_graf11 = figs(name="graf11_residuo",caption = "Gráfico de resíduos para Oque?")
+legenda_graf12 = figs(name="graf12_residuo",caption = "Gráfico de envelopes para ... ")
 ```
 
 
@@ -231,13 +294,18 @@ return(maxs)
 
 ```
 
-#Introdução
+\begin{enumerate}
+\item Introdução
+\end{enumerate}
+\vspace{0.3cm}
+\setlength{\parindent}{3em}
 
 Este presente trabalho é parte do escopo da disciplina ME613 - Regressão Linear e visa a aplicação dos conhecimentos adquiridos em sala de aula. Grande parte do trabalho foi baseado e adaptado a partir dos materiais disponibilizados na página do curso: [http://www.ime.unicamp.br/~cnaber/Material_ME613_2S_2016.htm]("http://www.ime.unicamp.br/~cnaber/Material_ME613_2S_2016.htm").  
 O conjunto de dados a ser analisado está disponível em na página do curso sob o nome "reg3.dat". Neste são  descritas as seguintes variáveis referentes a 50 estados norte-americanos: (i) **estado** (nome do estado), (ii) **pop** (população estimada em julho de 1975), (iii) **percap** (renda percapita em 1974 em USD), (iv) **analf** (proporção de analfabetos em 1970), (v) **expvida** (expectativa de vida em anos 1969-70), (vi) **crime** (taxa de criminalidade por 100000 habitantes 1976), (vii) **estud** (porcentagem de estudantes que concluem o segundo grau 1970), (viii) **ndias** (número de dias do ano com temperatura abaixo de zero grau Celsus na cidade mais importante do estado) e (ix) **area** (área do estado em milhas quadradas). O objetivo do estudo é tentar explicar a variável **expvida** usando um modelo de regressão normal linear dadas as variáveis explicativas **percap**, **analf**, **crime**, **estud**, **ndias** e **dens**, em que **dens**=pop/area (densidade da população estimada em julho de 1975 por área do estado em milhas quadradas).  
 Todos os modelos neste trabalho foram ajustados via metodologia de mínimos quadrados ordinários, veja Azevedo (2016), e todas suas respectivas análises residuais foram realizadas, conforme Paula (2013).
 A menos que seja citado o contrário, todas as variáveis que constam na base de dados serão referidas por sua descrição completa ou pelo nome que consta no banco de dados (estes foram supracitados em negrito). Denotaremos também:
-  
+ 
+\noindent  
 $Y_i$ - i-ésima observação da variável expvida  
 $x_{1i}$ - i-esima observação da variável percap  
 $x_{2i}$ - i-esima observação da variável analf  
@@ -246,7 +314,7 @@ $x_{4i}$ - i-esima observação da variável estud
 $x_{5i}$ - i-esima observação da variável ndias  
 $x_{6i}$ - i-esima observação da variável dens  
 
-
+\vspace{0.5cm}
 
 ```{r leitura,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -266,7 +334,16 @@ dados = dados %>% mutate(dens=pop/area)
 dados = dados %>% select(percap, analf, crime, estud, ndias,dens,expvida)
 ```
 
-#2.Análise Descritiva
+\vspace{0.5cm}
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item Análise descritiva
+\end{enumerate}
+\vspace{0.3cm}
+
+\begin{center}
+`r legenda_table1`
+\end{center}
 
 ```{r descritivas,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -288,8 +365,6 @@ resumo <- ddply(df, c("variable"), function(x) summary(x$value))
 resumo[,2:ncol(resumo)] <- round(resumo[,2:ncol(resumo)],4)
 resumo
 ```
-
-`r legenda_table1`
 
 ```{r boxplots,cache = TRUE,echo=FALSE, warning = FALSE,eval=FALSE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -315,11 +390,18 @@ ggplot(dispersao, aes(x = value, y =  expvida)) +
   facet_wrap(~variable, scales = "free") +  theme_bw()
 ```
 
-A partir da FiguraXX, podemos identificar visualmente a relação supracitada, a qual identificamos que todas as covariáveis parecem ter uma relação linear significativa, as quais existem relações lineares negativas entre a variável resposta e as covariáveis "analf" e "crime", assim como relações lineares negativas entre a variável resposta "expvida" e as covariáveis "percap","estud","ndias" e "dens" (a menos a um ponto).
+\begin{center}
+`r legenda_graf1` 
+\end{center}
 
+A partir da Figura 1, podemos identificar visualmente a relação supracitada, a qual identificamos que todas as covariáveis parecem ter uma relação linear significativa, as quais existem relações lineares negativas entre a variável resposta e as covariáveis "analf" e "crime", assim como relações lineares negativas entre a variável resposta "expvida" e as covariáveis "percap","estud","ndias" e "dens" (a menos a um ponto).
 
-
-#Análise Inferêncial
+\vspace{0.5cm}
+\begin{enumerate}
+\setcounter{enumi}{2}
+\item Análise Inferencial
+\end{enumerate}
+\vspace{0.3cm}
 
 
 ```{r padronizacao,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
@@ -333,6 +415,7 @@ dados[,c(1:(ncol(dados)-1))] =  sapply(dados[,c(1:(ncol(dados)-1))], function(x)
 
 Dada a constatação visual de relações lineares entre a variável resposta "expvida" e todas as covariáveis explicativas, é razoável iniciar um modelo que contemple todas estas covariáveis. Visando poder comparar diretamente os coeficiêntes do modelo, optamos por introduzir as covariáveis com médias e variâncias iguais, tornardo-as adimensionais. Portanto, vamos iniciar a análise com o seguinte modelo:
 
+\vspace{0.5cm}
 Modelo 1:
 
 $$
@@ -341,17 +424,21 @@ i= 1,\dots,50 \\
 j=  1,\dots,6
 \end{matrix}\right.
 $$
-em que  $\varepsilon_{i} \overset{i.i.d.}{\sim} N(0,\sigma^2)$ , $x_j=\frac{1}{50}\sum_{i=1}^{50}x_ji$ e  $s_j=\sqrt{\frac{1}{50}\sum_{i=1}^{50}(x_{ji}-\bar{x_j})^2}$
+\indent
+Onde:  $\varepsilon_{i} \overset{i.i.d.}{\sim} N(0,\sigma^2)$ , $x_j=\frac{1}{50}\sum_{i=1}^{50}x_ji$ e  $s_j=\sqrt{\frac{1}{50}\sum_{i=1}^{50}(x_{ji}-\bar{x_j})^2}$
 
-$Y_i$ : Expectativa de vida em anos (1969-70).  
-$\beta_0$ : Expectativa de vida esperada em anos (1969-70) para valores de covariáveis iguais às suas respectivas médias.  
-$\frac{\beta_1}{s_1}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "renda percapita (em 1974 em USD)" em uma unidade, mantendo-se as demais covariáveis fixas.  
-$\frac{\beta_2}{s_2}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "proporção de analfabetos (em 1970)" em uma unidade, mantendo-se as demais covariáveis fixas.  
-$\frac{\beta_3}{s_3}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "taxa de criminalidade (por 100000 habitantes 1976)" em uma unidade, mantendo-se as demais covariáveis fixas.  
-$\frac{\beta_4}{s_4}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "porcentagem
+\vspace{0.3cm}
+\begin{itemize}
+\item $Y_i$ : Expectativa de vida em anos (1969-70).  
+\item $\beta_0$ : Expectativa de vida esperada em anos (1969-70) para valores de covariáveis iguais às suas respectivas médias.  
+\item $\frac{\beta_1}{s_1}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "renda percapita (em 1974 em USD)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+\item $\frac{\beta_2}{s_2}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "proporção de analfabetos (em 1970)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+\item $\frac{\beta_3}{s_3}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "taxa de criminalidade (por 100000 habitantes 1976)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+\item $\frac{\beta_4}{s_4}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "porcentagem
 de estudantes que concluem o segundo grau (1970)" em uma unidade, mantendo-se as demais covariáveis fixas.  
-$\frac{\beta_5}{s_5}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor de "número de dias do ano com temperatura abaixo de zero grau Celsus na cidade mais importante do estado" em uma unidade, mantendo-se as demais covariáveis fixas.  
-$\frac{\beta_6}{s_6}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "densidade da população estimada em julho de 1975 por área do estado em milhas quadradas" em uma unidade, mantendo-se as demais covariáveis fixas.  
+\item $\frac{\beta_5}{s_5}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor de "número de dias do ano com temperatura abaixo de zero grau Celsus na cidade mais importante do estado" em uma unidade, mantendo-se as demais covariáveis fixas.  
+\item $\frac{\beta_6}{s_6}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "densidade da população estimada em julho de 1975 por área do estado em milhas quadradas" em uma unidade, mantendo-se as demais covariáveis fixas.  
+\end{itemize}
 
 ```{r modelo completo,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -381,7 +468,7 @@ mm_max = as.matrix(model.matrix(fit_max))
 
 ```
 
-Pode-se observar a partir das figuras XX e XX que o modelo não teve um ajuste adequado. No gráfico A não observação tendências,o que pode indicar uma independência dos dados. Já no gráfico B, observa-se uma leve heterocedasticidade, dado que entre os valores -2 e -1 de Valores Ajustados vê-se uma discrepâncias entre os resíduos studentizados do que entre os resíduos compreendidos entre os valores de -1 a 2. Porém, um fator de confundimento que pode ser levado em consideração é a flutuação amostral pois o banco de dados possui apenas cinquenta observações. é possível observar uma assimetria positiva no histograma apresentado (gráfico C da figura XX), assim como uma tendencia no gráfico de envelopes (figura XX) o que nos dá indícios de falta de normalidade nos resíduos. Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimétrica. Dado o escopo do curso, procede-se com as análises posteriores.
+Pode-se observar a partir das figuras 2 e 3 que o modelo não teve um ajuste adequado. No gráfico A não observação tendências,o que pode indicar uma independência dos dados. Já no gráfico B, observa-se uma leve heterocedasticidade, dado que entre os valores -2 e -1 de Valores Ajustados vê-se uma discrepâncias entre os resíduos studentizados do que entre os resíduos compreendidos entre os valores de -1 a 2. Porém, um fator de confundimento que pode ser levado em consideração é a flutuação amostral pois o banco de dados possui apenas cinquenta observações. é possível observar uma assimetria positiva no histograma apresentado (gráfico C da figura XX), assim como uma tendencia no gráfico de envelopes (figura XX) o que nos dá indícios de falta de normalidade nos resíduos. Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimétrica. Dado o escopo do curso, procede-se com as análises posteriores.
 
 
 ```{r residuos,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
@@ -392,6 +479,9 @@ Pode-se observar a partir das figuras XX e XX que o modelo não teve um ajuste a
 #grpaficos para análise de resíduos
 diag2norm(fit_max)
 ```
+\begin{center}
+`r legenda_graf2`
+\end{center}
 
 ```{r envelope,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -400,7 +490,15 @@ diag2norm(fit_max)
 envelnorm(fit_max)
 ```
 
-Note, pela tabela XX(lembrando que os valores da tabela estão arredondados em quatro casas decimais) que somente os parêmetros relacionados às covariáveis "crime", "ndias" e "dens" significativos à um nível de significancia = 0,10. A partir desse resultado, temos a indicação de que um modelo reduzido pode ser mais apropriado. Contudo, desejamos também, obter o modelo que melhor se ajusta aos dados.
+\begin{center}
+`r legenda_graf3`
+\end{center}
+
+Note, pela tabela 2 (lembrando que os valores da tabela estão arredondados em quatro casas decimais) que somente os parêmetros relacionados às covariáveis "crime", "ndias" e "dens" significativos à um nível de significancia = 0,10. A partir desse resultado, temos a indicação de que um modelo reduzido pode ser mais apropriado. Contudo, desejamos também, obter o modelo que melhor se ajusta aos dados.
+
+\begin{center}
+`r legenda_table2`
+\end{center}
 
 ```{r coeficientes para fit_max,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #pacote para produzir tabela em latex
@@ -413,7 +511,12 @@ kable(coeff_fit_max)
 
 ```
 
-#Seleção dos modelos
+
+
+3.1 Seleção dos modelos
+
+\vspace{0.3cm}
+
 A técnica escolhida para nos auxiliar a selecionar o modelo normal linear homocedastico que melhor se ajusta aos dados foi a técnica stepwise, veja Azevedo (2016).
 
 ```{r modelo intercepto,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
@@ -431,7 +534,6 @@ fitmin <- lm(expvida~1,data = dados)
 step_min <- step(fitmin,scope = list(upper=fit_max),direction = "both")
 
 ```
-
 
 ```{r stepwisemax,cache = TRUE,echo=FALSE, warning = FALSE,eval=FALSE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -457,14 +559,19 @@ i= 1,\dots,50 \\
 j=  3,\dots,6
 \end{matrix}\right.
 $$
-em que  $\varepsilon_{i} \overset{i.i.d.}{\sim} N(0,\sigma^2)$ , $x_j=\frac{1}{50}\sum_{i=1}^{50}x_ji$ e  $s_j=\sqrt{\frac{1}{50}\sum_{i=1}^{50}(x_{ji}-\bar{x_j})^2}$
 
-$Y_i$ : Expectativa de vida em anos (1969-70).  
-$\beta_0$ : Expectativa de vida esperada em anos (1969-70) para valores de covariáveis iguais às suas respectivas médias.  
-$\frac{\beta_3}{s_3}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "taxa de criminalidade (por 100000 habitantes 1976)" em uma unidade, mantendo-se as demais covariáveis fixas.  
-$\frac{\beta_4}{s_4}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "porcentagem de estudantes que concluem o segundo grau (1970)" em uma unidade, mantendo-se as demais covariáveis fixas.  
-$\frac{\beta_5}{s_5}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor de "número de dias do ano com temperatura abaixo de zero grau Celsus na cidade mais importante do estado" em uma unidade, mantendo-se as demais covariáveis fixas.  
-$\frac{\beta_6}{s_6}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "densidade da população estimada em julho de 1975 por área do estado em milhas quadradas" em uma unidade, mantendo-se as demais covariáveis fixas.
+\indent
+Onde  $\varepsilon_{i} \overset{i.i.d.}{\sim} N(0,\sigma^2)$ , $x_j=\frac{1}{50}\sum_{i=1}^{50}x_ji$ e  $s_j=\sqrt{\frac{1}{50}\sum_{i=1}^{50}(x_{ji}-\bar{x_j})^2}$
+
+\vspace{0.3cm}
+\begin{itemize}
+\item $Y_i$ : Expectativa de vida em anos (1969-70).  
+\item $\beta_0$ : Expectativa de vida esperada em anos (1969-70) para valores de covariáveis iguais às suas respectivas médias.  
+\item $\frac{\beta_3}{s_3}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "taxa de criminalidade (por 100000 habitantes 1976)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+\item $\frac{\beta_4}{s_4}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "porcentagem de estudantes que concluem o segundo grau (1970)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+\item $\frac{\beta_5}{s_5}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor de "número de dias do ano com temperatura abaixo de zero grau Celsus na cidade mais importante do estado" em uma unidade, mantendo-se as demais covariáveis fixas.  
+\item $\frac{\beta_6}{s_6}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "densidade da população estimada em julho de 1975 por área do estado em milhas quadradas" em uma unidade, mantendo-se as demais covariáveis fixas.
+\end{itemize}
 
 ```{r Modelo Otimo,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -501,6 +608,10 @@ Neste caso, deveria-se procurar modelos alternativos que levem em consideração
 diag2norm(fit_otimo)
 ```
 
+\begin{center}
+`r legenda_graf4`
+\end{center}
+
 ```{r envelope modelo otimo,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
@@ -508,11 +619,13 @@ diag2norm(fit_otimo)
 envelnorm(fit_otimo)
 ```
 
+\begin{center}
+`r legenda_graf5`
+\end{center}
 
 Note que a tabela acima acusa que o parâmetro $\beta_0$ não é significativo no modelo para um nível de significância de 0,10. Sendo assim, vamos ajustar o modelo anterior sem intercepto. 
 
 Modelo 3:
-
 
 $$
 Y_i = \sum_{j=3}^{6}\beta_j \left (\frac{x_{ji}-\bar{x_j}}{s_j}   \right ) + \varepsilon_{i}\left\{\begin{matrix}
@@ -520,13 +633,21 @@ i= 1,\dots,50 \\
 j=  3,\dots,6
 \end{matrix}\right.
 $$
-em que  $\varepsilon_{i} \overset{i.i.d.}{\sim} N(0,\sigma^2)$ , $x_j=\frac{1}{50}\sum_{i=1}^{50}x_ji$ e  $s_j=\sqrt{\frac{1}{50}\sum_{i=1}^{50}(x_{ji}-\bar{x_j})^2}$
+\indent
+Onde  $\varepsilon_{i} \overset{i.i.d.}{\sim} N(0,\sigma^2)$ , $x_j=\frac{1}{50}\sum_{i=1}^{50}x_ji$ e  $s_j=\sqrt{\frac{1}{50}\sum_{i=1}^{50}(x_{ji}-\bar{x_j})^2}$
 
-$Y_i$ : Expectativa de vida em anos (1969-70).  
-$\frac{\beta_3}{s_3}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "taxa de criminalidade (por 100000 habitantes 1976)" em uma unidade, mantendo-se as demais covariáveis fixas.  
-$\frac{\beta_4}{s_4}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "porcentagem de estudantes que concluem o segundo grau (1970)" em uma unidade, mantendo-se as demais covariáveis fixas.  
-$\frac{\beta_5}{s_5}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor de "número de dias do ano com temperatura abaixo de zero grau Celsus na cidade mais importante do estado" em uma unidade, mantendo-se as demais covariáveis fixas.  
-$\frac{\beta_6}{s_6}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "densidade da população estimada em julho de 1975 por área do estado em milhas quadradas" em uma unidade, mantendo-se as demais covariáveis fixas.  
+\vspace{0.3cm}
+\begin{itemize}
+\item$Y_i$ : Expectativa de vida em anos (1969-70).  
+\item $\frac{\beta_3}{s_3}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "taxa de criminalidade (por 100000 habitantes 1976)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+
+\item $\frac{\beta_4}{s_4}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "porcentagem de estudantes que concluem o segundo grau (1970)" em uma unidade, mantendo-se as demais covariáveis fixas.  
+
+\item $\frac{\beta_5}{s_5}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor de "número de dias do ano com temperatura abaixo de zero grau Celsus na cidade mais importante do estado" em uma unidade, mantendo-se as demais covariáveis fixas.  
+
+\item $\frac{\beta_6}{s_6}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "densidade da população estimada em julho de 1975 por área do estado em milhas quadradas" em uma unidade, mantendo-se as demais covariáveis fixas. 
+
+\end{itemize}
 
 ```{r Modelo Otimo Sem intercepto,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -562,6 +683,10 @@ mm = as.matrix(model.matrix(fit_otimoS))
 diag2norm(fit_otimoS)
 ```
 
+\begin{center}
+`r legenda_graf6`
+\end{center}
+
 ```{r envelope modelo otimo sem intercepto,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
@@ -569,9 +694,15 @@ diag2norm(fit_otimoS)
 envelnorm(fit_otimoS)
 ```
 
+\begin{center}
+`r legenda_graf7`
+\end{center}
 
 A tabela XX abaixo mostra as principais medidas de comparação entre os dois últimos modelos (com e sem intercepto). Observamos nela, valores menores de AIC e BIC para o modelo sem intercepto, o que nos da uma indicação de que o modelo sem intercepto é preferível.
 
+\begin{center}
+`r legenda_table3`
+\end{center}
 ```{r comparacao modelo otimo c e s intercepto,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 library(knitr)
 #dados para gerar a tabela de comparação dos modelos com e sem intercepto
@@ -584,7 +715,9 @@ as.data.frame(tbl_comparacao)
 
 Mesmo o modelo não apresentando muitas covariáveis, é interessante, a fim de assegurar a validade dos resultados obtidos (desconsidere que o modelo não teve um bom ajuste), verificar também a possibilidade de se ter multicolinearidade presente no modelo ajustado. Com o propósito de identificar alguma indicação de multicolinearidade no modelo, podemos análisar os coeficiêntes de corelação linear entre as covariáveis "crime", "estud", "ndias" e "dens". Porém, observamos na tabela XX (abaixo) que nenhum par de covariáveis apresenta coeficiente de correlação deveras alto, assim como a natureza das covariáveis presentes no medelo não apresentarem nenhum indício de serem fontes de multicolinearidade.
 
-
+\begin{center}
+`r legenda_table4`
+\end{center}
 ```{r,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #Análise de multicolineariedade descritivamente
 
@@ -614,7 +747,9 @@ Observando a figura XX podemos identificar a existência de pontos distantes dos
 
 anainflu_norm(fit_otimoS)
 ```
-
+\begin{center}
+`r legenda_graf8`
+\end{center}
 
 
 ```{r valores_alavancagem, cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
@@ -670,6 +805,9 @@ mm_adj1 = as.matrix(model.matrix(fit_otimoS_adj1))
 #grpaficos para análise de resíduos
 diag2norm(fit_otimoS_adj1)
 ```
+\begin{center}
+`r legenda_graf9`
+\end{center}
 
 ```{r envelope modelo otimo ajustado 1,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -677,6 +815,9 @@ diag2norm(fit_otimoS_adj1)
 #gráfico de envelopes
 envelnorm(fit_otimoS_adj1)
 ```
+\begin{center}
+`r legenda_graf10`
+\end{center}
 
 ```{r fit_otimoS_adj2,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 
@@ -708,6 +849,9 @@ mm_adj1 = as.matrix(model.matrix(fit_otimoS_adj1))
 #grpaficos para análise de resíduos
 diag2norm(fit_otimoS_adj2)
 ```
+\begin{center}
+`r legenda_graf11`
+\end{center}
 
 ```{r envelope modelo otimo ajustado 2,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -715,10 +859,13 @@ diag2norm(fit_otimoS_adj2)
 #gráfico de envelopes
 envelnorm(fit_otimoS_adj2)
 ```
+\begin{center}
+`r legenda_graf12`
+\end{center}
 
-
-
-
+\begin{center}
+`r legenda_table5`
+\end{center}
 ```{r tabela de comparcao modelos,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #medidas_fit_max
 #medidas_fit_otimo
@@ -732,8 +879,30 @@ medidas_comp_model
 
 ```
 
-
-
-#Conclusões
+\newpage
+\vspace{0.5cm}
+\begin{enumerate}
+\setcounter{enumi}{3}
+\item Conclusões
+\end{enumerate}
+\vspace{0.3cm}
 
 Como visto, nenhum modelo destes propostos teve um bom ajuste ao conjunto de dados não obstante utilizaremos o modelo quatro pois é o que apresenta as  melhores estimativas de comparação de modelo, ou seja baixo AIC E BIC, alta Log-Verossimilhança. Podemos observar também que há uma relaç
+
+\vspace{0.5cm}
+\begin{enumerate}
+\setcounter{enumi}{4}
+\item Referências Bibliográficas
+\end{enumerate}
+
+\vspace{0.3cm}
+\begin{itemize}
+  \item Azevedo, C. L. N (2016). Notas de aula sobre planejamento e análise de experimentos,\url{http://www.ime.unicamp.br/~cnaber/Material_ME613_2S_20
+16.htm}
+  \item Faraway, J. J. (2014). Linear Models with R, Second Edition,Chapman e Hall/CRC Texts in Statistical Science
+  \item Draper, N. R. and Smith, H. (1998). Applied regression analysis, third edition. New York, NY: John Wiley e Sons.
+  \item Paula, G. A. (2013). Modelos de regressão com apoio computacional, versão pré-eliminar \url{https://www.ime.usp.br/~giapaula/texto_2013.pdf}
+  
+\end{itemize}
+
+\vspace{0.5cm}
