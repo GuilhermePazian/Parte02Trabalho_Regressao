@@ -73,11 +73,20 @@ legenda_graf11 = figs(name="graf11_envelope",caption = "Gráfico de envelope par
 ```{r Funcoes,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
-#Função que produz os quatro gráficos para a análise de resíduos
+library(ggplot2)
+library(gridExtra)
+# Programa extraído do site: https://www.ime.usp.br/~giapaula/textoregressao.htm
+# Créditos: Prof. Dr. Gilberto Alvarenga Paula
+# Adaptado por Caio L. N. Azevedo
+# source("C:\\Users\\cnaber\\Trabalho\\windows\\Unicamp\\Disciplinas\\2_semestre_2016\\ME 613\\Programas\\diag2_norm.r")
+
+
 diag2norm<-function(fit.model){
 # fit.model: objeto com o ajuste do modelo normal linear homocedástico 
 # obtido através da função "lm"
 
+  
+  
 X <- model.matrix(fit.model)
 n <- nrow(X)
 p <- ncol(X)
@@ -96,13 +105,13 @@ b <- min(tsi)
 
 g1 = ggplot(data=data.frame(tam,tsi),aes(tam,tsi))+ geom_point() +scale_y_continuous(name = "Resíduo Studentizado",limits=c(b-1,a+1)) +scale_x_continuous(name = "Índice")+labs(title="A")+geom_hline(yintercept=0,size=0.25,linetype=2)+geom_hline(yintercept=2,size=0.25,linetype=2)+geom_hline(yintercept=-2,size=0.25,linetype=2)+theme_light()
 
-g2 =  ggplot(data=data.frame(fitted(fit.model),tsi),aes(fitted(fit.model),tsi))+ geom_point() +scale_y_continuous(name = "Resíduo Studentizado",limits=c(b-1,a+1)) +scale_x_continuous(name = "Valores Ajustados")+labs(title="A")+geom_hline(yintercept=0,size=0.25,linetype=2)+geom_hline(yintercept=2,size=0.25,linetype=2)+geom_hline(yintercept=-2,size=0.25,linetype=2)+theme_light()
+g2 =  ggplot(data=data.frame(fitted(fit.model),tsi),aes(fitted(fit.model),tsi))+ geom_point() +scale_y_continuous(name = "Resíduo Studentizado",limits=c(b-1,a+1)) +scale_x_continuous(name = "Valores Ajustados")+labs(title="B")+geom_hline(yintercept=0,size=0.25,linetype=2)+geom_hline(yintercept=2,size=0.25,linetype=2)+geom_hline(yintercept=-2,size=0.25,linetype=2)+theme_light()
 
 #Histograma
 g3 = ggplot(data=data.frame(tsi),aes(tsi,col=I("black"),fill=I("white")))+geom_histogram(binwidth = 1,aes(y=..density..))+labs(title="C",x="Resíduo Studentizado",y="Densidade")+theme_light()
 
 #Boxplot
-g4 = ggplot(data=data.frame(fac = factor(1),tsi),aes(fac,tsi,col=I("black"),fill=I("white")))+ geom_boxplot(outlier.size = 2.5, outlier.colour = "red",width=0.4)+scale_x_discrete(name="")+scale_y_continuous(name = "Residuo Studentizado")+theme(axis.text.x = element_blank())+theme_light()
+g4 = ggplot(data=data.frame(fac = factor(1),tsi),aes(fac,tsi,col=I("black"),fill=I("white")))+ geom_boxplot(outlier.size = 1.5, outlier.colour = "red",width=0.4)+labs(title="D")+scale_x_discrete(name="")+scale_y_continuous(name = "Residuo Studentizado")+theme(axis.text.x = element_blank())+theme_light()
 
 #funcao que une todos os gráficos
 grid.arrange(g1,g2,g3,g4,ncol=2,nrow=2)
@@ -167,33 +176,34 @@ envelnorm<-function(fit.model){
 
 
 anainflu_norm<-function(fit.model){
-# fit.model: objeto com o ajuste do modelo normal linear homocedástico 
-# obtido através da função "lm"
-X <- model.matrix(fit.model)
-n <- nrow(X)
-p <- ncol(X)
-H <- X%*%solve(t(X)%*%X)%*%t(X)
-h <- diag(H)
-lms <- summary(fit.model)
-s <- lms$sigma
-r <- resid(lms)
-ts <- r/(s*sqrt(1-h))
-di <- (1/p)*(h/(1-h))*(ts^2)
-si <- lm.influence(fit.model)$sigma
-tsi <- r/(si*sqrt(1-h))
-a <- max(tsi)
-b <- min(tsi)
-par(mfrow=c(1,2))
-plot(h,xlab="Índice", ylab="Medida h", pch=16, ylim=c(0,1),cex=1.1,cex.axis=1.1,cex.lab=1.1)
-cut <- 2*p/n
-abline(cut,0,lty=2)
-#identify(h, n=1)
-#title(sub="(a)")
-#
-plot(di,xlab="Índice", ylab="Distância de Cook", pch=16,cex=1.1,cex.axis=1.1,cex.lab=1.1)
-#identify(di, n=2)
-#
-#------------------------------------------------------------#
+  # fit.model: objeto com o ajuste do modelo normal linear homocedástico 
+  # obtido através da função "lm"
+  X <- model.matrix(fit.model)
+  n <- nrow(X)
+  p <- ncol(X)
+  H <- X%*%solve(t(X)%*%X)%*%t(X)
+  h <- diag(H)
+  lms <- summary(fit.model)
+  s <- lms$sigma
+  r <- resid(lms)
+  ts <- r/(s*sqrt(1-h))
+  di <- (1/p)*(h/(1-h))*(ts^2)
+  si <- lm.influence(fit.model)$sigma
+  tsi <- r/(si*sqrt(1-h))
+  a <- max(tsi)
+  b <- min(tsi)
+  ind = 1:length(h)
+  cut <- 2*p/n
+  
+  #Gráfico Medida h
+  g1 = ggplot(data=data.frame(ind=ind,h=h),aes(ind,h))+geom_point()+labs(x="Indice",y="Medida h")+geom_abline(intercept = cut, slope=0, linetype = 2)+theme_light()
+  
+  #Gráfico distância de Cook
+  g2 = ggplot(data=data.frame(ind=ind,di=di),aes(ind,di))+geom_point()+labs(x="Indice",y="Distância de Cook")+theme_light()
+  
+  grid.arrange(g1,g2,ncol = 2,nrow = 1)
+  #
+  #------------------------------------------------------------#
 }
 
 anainflu_ind = function(fit.model){ 
@@ -279,6 +289,7 @@ resumo[,2:ncol(resumo)] <- round(resumo[,2:ncol(resumo)],4)
 resumo
 ```
 
+`r legenda_table1`
 
 ```{r boxplots,cache = TRUE,echo=FALSE, warning = FALSE,eval=FALSE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
@@ -316,7 +327,7 @@ A partir da FiguraXX, podemos identificar visualmente a relação supracitada, a
 
 
 #Padronizacao dos dados
-dados[,c(1:ncol(dados))] =  sapply(dados[,c(1:ncol(dados))], function(x) (x-mean(x))/sd(x))
+dados[,c(1:(ncol(dados)-1))] =  sapply(dados[,c(1:(ncol(dados)-1))], function(x) (x-mean(x))/sd(x))
 
 ```
 
@@ -369,9 +380,8 @@ mm_max = as.matrix(model.matrix(fit_max))
 
 
 ```
-Pode-se observar a partir das figuras XX e XX que o modelo não teve um ajuste adequado, uma vez que se é possível observar uma assimetria positiva no histograma apresentado (gráfico YY da figura XX), assim como uma tendencia no gráfico de envelopes (figura XX) o que nos dá indícios de falta de normalidade nos resíduos. **!!!eu não identifiquei heterocedasticidade, se alguem achar que têm, escreva algum argumento!!!**. Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimetrica. Dado o escopo do curso, procede-se com as análises posteriores.
 
-
+Pode-se observar a partir das figuras XX e XX que o modelo não teve um ajuste adequado. No gráfico A não observação tendências,o que pode indicar uma independência dos dados. Já no gráfico B, observa-se uma leve heterocedasticidade, dado que entre os valores -2 e -1 de Valores Ajustados vê-se uma discrepâncias entre os resíduos studentizados do que entre os resíduos compreendidos entre os valores de -1 a 2. Porém, um fator de confundimento que pode ser levado em consideração é a flutuação amostral pois o banco de dados possui apenas cinquenta observações. é possível observar uma assimetria positiva no histograma apresentado (gráfico C da figura XX), assim como uma tendencia no gráfico de envelopes (figura XX) o que nos dá indícios de falta de normalidade nos resíduos. Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimétrica. Dado o escopo do curso, procede-se com as análises posteriores.
 
 
 ```{r residuos,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
@@ -389,7 +399,8 @@ diag2norm(fit_max)
 #gráfico de envelopes
 envelnorm(fit_max)
 ```
-Note, pela tabela XX que somente os parêmetros relacionados às covariáveis "crime", "ndias" e "dens" significativos à um nível de significancia =0,10. A partir desse resultado, temos a indicação de que um modelo reduzido pode ser mais apropriado. Contudo, desejamos também, obter o modelo que melhor se ajusta aos dados.
+
+Note, pela tabela XX(lembrando que os valores da tabela estão arredondados em quatro casas decimais) que somente os parêmetros relacionados às covariáveis "crime", "ndias" e "dens" significativos à um nível de significancia = 0,10. A partir desse resultado, temos a indicação de que um modelo reduzido pode ser mais apropriado. Contudo, desejamos também, obter o modelo que melhor se ajusta aos dados.
 
 ```{r coeficientes para fit_max,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #pacote para produzir tabela em latex
@@ -398,7 +409,7 @@ library(knitr)
 # !!! depois editar!!!
 #coeficientes e R^2 e R^2 ajustado
 
-kable(summary(fit_max)$coefficients)
+kable(coeff_fit_max)
 
 ```
 
@@ -480,7 +491,7 @@ rownames(medidas_fit_otimo)=c("AIC","BIC","Log-Verossimilhança","R2","R2 ajusta
 mm = as.matrix(model.matrix(fit_otimo))
 ```
 
-Em anuência ao ajuste do modelo anterior, este modelo também não apresentou um ajuste adequado, uma vez que se observa nas figuras YY XX indícios de mal ajuste semelhantes aos observados na análise residual para o modelo anterior. **!!! alguém identificou algum problema a mais??? argumentar aqui!!!** 
+Em anuência ao ajuste do modelo anterior, este modelo também não apresentou um ajuste adequado, uma vez que se observa nas figuras YY e XX indícios de mal ajuste semelhantes aos observados na análise residual para o modelo anterior. Porém uma ressalva pode ser feita de que no gráfico B pode-se observar que as discrepâncias entre os resíduos mudam conforme o valor ajustado aumenta   
 Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimetrica. Novamente, dado o escopo do curso, procede-se com as análises posteriores.
 
 ```{r residuos modelo otimo,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
@@ -596,8 +607,6 @@ Além disso, Sabe-se que se a razão entre o maior autovalor ($\lambda_{max}$) e
 
 Observando a figura XX podemos identificar a existência de pontos distantes dos demais, o que é uma indicação de alavancagem.
 
-**!!!escrever explicaçõs, identificar os pontos e depois ajustar modelos sem estes pontos e compara-los via AIC e BIC!!!**
-
 ```{r alavancagem,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
@@ -629,11 +638,11 @@ Vemos para o gráfico de Medida h, o ponto que se destaca é o de indice `r indh
 
 Logo, como identificamos esses pontos, vamos montar um modelo reduzido, como feito acima mas excluindo primeiramente as observações de indice 40 pois nos dois caso é o ponto mais elevado, possívelmente o que mais influência no modelo. caso ocorra uma melhora de ajuste, faremos para o outro identificado pela Distância de Cook.
 
-Segue abaixo o ajuste do modelo sem a observação 40
+Segue abaixo o ajuste do modelo sem aa observações 11 e 40
 
 ```{r fit_otimoS_adj1,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 
-fit_otimoS_adj1 <- lm(expvida ~ -1 + crime + estud + ndias + dens, data = dados[-4,])
+fit_otimoS_adj1 <- lm(expvida ~ -1 + crime + estud + ndias + dens, data = dados[-c(11,40),])
 
 
 res_fit_otimoS_adj1 = summary(fit_otimoS_adj1)
@@ -726,3 +735,5 @@ medidas_comp_model
 
 
 #Conclusões
+
+Como visto, nenhum modelo destes propostos teve um bom ajuste ao conjunto de dados não obstante utilizaremos o modelo quatro pois é o que apresenta as  melhores estimativas de comparação de modelo, ou seja baixo AIC E BIC, alta Log-Verossimilhança. Podemos observar também que há uma relaç
