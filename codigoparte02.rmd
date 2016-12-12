@@ -64,8 +64,12 @@ Murilo Salgado Razoli  RA:150987 \break
 
 \onehalfspacing
 \newpage
+```{r echo=FALSE}
+#mudando o separador decimal para resultados "printados"
+options(OutDec= ",")
+```
 
-```{r pacotes,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE, error = FALSE}
+```{r pacotes,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE, error = FALSE}
 #eval= FALSE faz com que o R ignore este chunk
 #echo = FALSE não permite que o chunk apareça no pdf
 
@@ -102,15 +106,16 @@ tbls <- captioner(prefix="Tabela")
 
 ```
 
-```{r legendas, cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r legendas, cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #legenda para as tabelas
 
 # legenda para a primeira tabela(estats descr) do primeiro exercício
 legenda_table1 = tbls(name="table_estat_descr1",caption = "Estatísticas Descritivas")
 legenda_table2 = tbls(name="table_comparacao",caption = "Estimativas dos parâmetros, intervalo de confiança e teste de nulidade para o modelo 1")
-legenda_table3 = tbls(name="table_comparacao",caption = "Tabela de comparação")
+legenda_table3 = tbls(name="coeff_fit_otimo",caption = "Estimativas dos parâmetros, intervalo de confiança e teste de nulidade para o modelo 2")
 legenda_table4 = tbls(name="table_mult",caption = "Tabela dos coeficientes de correlação linear entre as covariáveis")
-legenda_table5 = tbls(name="table_comp",caption = "Tabela de Comparação")
+legenda_table5 = tbls(name="table_comp1",caption = "Tabela de Comparação dos modelos 1, 2 e 3")
+legenda_table6 = tbls(name="table_comp2",caption = "Tabela de Comparação dos modelos 1, 2, 3 e 4")
 
 #legendas para os gráficos
 
@@ -118,22 +123,21 @@ legenda_table5 = tbls(name="table_comp",caption = "Tabela de Comparação")
 legenda_graf1 = figs(name="graf1_dispersao",caption = "Gráficos de dispersão")
 #legenda para o primeiro grárico de dispersão
 legenda_graf2 = figs(name="graf2_residuos",caption = "Análise de Resíduo para o modelo 1")
-legenda_graf3 = figs(name="graf3_residuos",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 1")
+legenda_graf3 = figs(name="graf3_residuos",caption = "Gráfico de envelope para os resíduos studentizado para o modelo 1")
 legenda_graf4 = figs(name="graf4_residuos",caption = "Análise residual para o modelo 2")
-legenda_graf5 = figs(name="graf5_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 2")
-legenda_graf6 = figs(name="graf6_analiseresidual",caption = "Análise residual para o modelo 3")
-legenda_graf7 = figs(name="graf7_envelope",caption = "Gráfico de envelope para o resíduos studentizado para o modelo 3")
-legenda_graf8 = figs(name="graf8_analiseresidual",caption = "ESCOLHER LEGENDA")
-legenda_graf9 = figs(name="graf9_residuo",caption = "Gráfico de resíduos para o modelo 4 CONFERIR")
-legenda_graf10 = figs(name="graf10_envelope",caption = "Gráfico de envelope para o resíduos studentizado para OQUE? ")
-legenda_graf11 = figs(name="graf11_residuo",caption = "Gráfico de resíduos para Oque?")
-legenda_graf12 = figs(name="graf12_residuo",caption = "Gráfico de envelopes para ... ")
+legenda_graf5 = figs(name="graf5_envelope",caption = "Gráfico de envelope para os resíduos studentizado para o modelo 2")
+legenda_graf6 = figs(name="anainflu_norm(fit_otimo)",caption = "Pontos alavanca e distância de Cook")
+legenda_graf7 = figs(name="diag2norm(fit_otimo_adj1)",caption = "Análise residual para o modelo 3")
+legenda_graf8 = figs(name="envelnorm(fit_otimo_adj1)",caption = "Gráfico de envelope para os resíduos studentizado para o modelo 3")
+legenda_graf9 = figs(name="diag2norm(fit_otimo_adj2)",caption = "Análise residual para o modelo 4")
+legenda_graf10 = figs(name="envelnorm(fit_otimo_adj2)",caption = "Gráfico de envelope para os resíduos studentizado para o modelo 4")
+
 ```
 
 
 
 
-```{r Funcoes,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r Funcoes,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 library(ggplot2)
@@ -292,6 +296,19 @@ maxs = list(maxh,as.double(h[maxh]),maxdi[1],maxdi[2],as.double(di[maxdi][1]),as
 return(maxs)
 }
 
+#FUÇÃO para fazer os ICs
+#fit é o modelo ajustado
+ICt_FIT <- function(fit) {
+n <- length(fit$residuals)
+p <- length(fit$coefficients)
+est <- summary(fit)$coefficients[,1] 
+ep <- summary(fit)$coefficients[,2]
+LI_IC_.95 <- round(est-qt(0.975,n-p)*ep,4)
+LS_IC_.95 <- round(est+qt(0.975,n-p)*ep,4)
+IC <- data.frame(LI_IC_.95,LS_IC_.95)
+names(IC) <- c("LI IC (.95)","LS IC (.95)")
+return(IC)
+}
 ```
 
 \begin{enumerate}
@@ -300,8 +317,8 @@ return(maxs)
 \vspace{0.3cm}
 \setlength{\parindent}{3em}
 
-Este presente trabalho é parte do escopo da disciplina ME613 - Regressão Linear e visa a aplicação dos conhecimentos adquiridos em sala de aula. Grande parte do trabalho foi baseado e adaptado a partir dos materiais disponibilizados na página do curso: [http://www.ime.unicamp.br/~cnaber/Material_ME613_2S_2016.htm]("http://www.ime.unicamp.br/~cnaber/Material_ME613_2S_2016.htm").  
-O conjunto de dados a ser analisado está disponível em na página do curso sob o nome "reg3.dat". Neste são  descritas as seguintes variáveis referentes a 50 estados norte-americanos: (i) **estado** (nome do estado), (ii) **pop** (população estimada em julho de 1975), (iii) **percap** (renda percapita em 1974 em USD), (iv) **analf** (proporção de analfabetos em 1970), (v) **expvida** (expectativa de vida em anos 1969-70), (vi) **crime** (taxa de criminalidade por 100000 habitantes 1976), (vii) **estud** (porcentagem de estudantes que concluem o segundo grau 1970), (viii) **ndias** (número de dias do ano com temperatura abaixo de zero grau Celsus na cidade mais importante do estado) e (ix) **area** (área do estado em milhas quadradas). O objetivo do estudo é tentar explicar a variável **expvida** usando um modelo de regressão normal linear dadas as variáveis explicativas **percap**, **analf**, **crime**, **estud**, **ndias** e **dens**, em que **dens**=pop/area (densidade da população estimada em julho de 1975 por área do estado em milhas quadradas).  
+Este presente trabalho é parte do escopo da disciplina ME613 - Regressão Linear e visa a aplicação dos conhecimentos adquiridos em sala de aula. Grande parte do trabalho foi baseado e adaptado a partir dos materiais disponibilizados na página do curso: *[http://www.ime.unicamp.br/~cnaber/Material_ME613_2S_2016.htm]("http://www.ime.unicamp.br/~cnaber/Material_ME613_2S_2016.htm")*.  
+O conjunto de dados a ser analisado está disponível na página do curso sob o nome "reg3.dat". Neste são  descritas as seguintes variáveis referentes a 50 estados norte-americanos: (i) **estado** (nome do estado), (ii) **pop** (população estimada em julho de 1975), (iii) **percap** (renda percapita em 1974 em USD), (iv) **analf** (proporção de analfabetos em 1970), (v) **expvida** (expectativa de vida em anos 1969-70), (vi) **crime** (taxa de criminalidade por 100000 habitantes 1976), (vii) **estud** (porcentagem de estudantes que concluem o segundo grau 1970), (viii) **ndias** (número de dias do ano com temperatura abaixo de zero grau Celsus na cidade mais importante do estado) e (ix) **area** (área do estado em milhas quadradas). O objetivo do estudo é tentar explicar a variável **expvida** usando um modelo de regressão normal linear dadas as variáveis explicativas **percap**, **analf**, **crime**, **estud**, **ndias** e **dens**, em que **dens**=pop/area (densidade da população estimada em julho de 1975 por área do estado em milhas quadradas).  
 Todos os modelos neste trabalho foram ajustados via metodologia de mínimos quadrados ordinários, veja Azevedo (2016), e todas suas respectivas análises residuais foram realizadas, conforme Paula (2013).
 A menos que seja citado o contrário, todas as variáveis que constam na base de dados serão referidas por sua descrição completa ou pelo nome que consta no banco de dados (estes foram supracitados em negrito). Denotaremos também:
  
@@ -316,7 +333,9 @@ $x_{6i}$ - i-esima observação da variável dens
 
 \vspace{0.5cm}
 
-```{r leitura,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+OBS: Todas as análises presentes neste trabalho foram obtidas com auxílio dos softwares "R" e "RStudio". Ambos são gratuitos e estão disponíveis nos sites *[https://cran.r-project.org/index.html]("https://cran.r-project.org/index.html")* e *[https://www.rstudio.com/products/rstudio/download/]("https://www.rstudio.com/products/rstudio/download/")* respectivamente.
+  
+```{r leitura,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 library(plyr)
 library(tidyverse)
@@ -333,7 +352,8 @@ dados = dados %>% mutate(dens=pop/area)
 #seleção das variáveis segundo orientação do Caio
 dados = dados %>% select(percap, analf, crime, estud, ndias,dens,expvida)
 ```
-
+Para melhor entendimento dos dados, podemos observar algumas estátisticas descritivas dos dados representadas na tabela 1.  
+  
 \vspace{0.5cm}
 \begin{enumerate}
 \setcounter{enumi}{1}
@@ -345,7 +365,7 @@ dados = dados %>% select(percap, analf, crime, estud, ndias,dens,expvida)
 `r legenda_table1`
 \end{center}
 
-```{r descritivas,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r descritivas,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 library(reshape2)
@@ -363,10 +383,16 @@ df <- melt(estat_desc, id.vars = 0)
 resumo <- ddply(df, c("variable"), function(x) summary(x$value))
 #arredondando os valores !!! tentar arredondar os decimais porem manter os discretos com somente o valor!!!
 resumo[,2:ncol(resumo)] <- round(resumo[,2:ncol(resumo)],4)
+
+#colocando todas as medidas com 4 casas decimais
+resumo$Max. <- sprintf("%.4f",resumo$Max.)
+resumo$Mean <- sprintf("%.4f",resumo$Mean)
+resumo$Median <- sprintf("%.4f",resumo$Median)
+names(resumo) <- c("Variável","Min.","1º quartil","Mediana","Média","3º quartil","Max.")
 resumo
 ```
 
-```{r boxplots,cache = TRUE,echo=FALSE, warning = FALSE,eval=FALSE,message = FALSE}
+```{r boxplots,cache = FALSE,echo=FALSE, warning = FALSE,eval=FALSE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 #eval= FALSE faz com que o R ignore este chunk
 
@@ -378,9 +404,9 @@ ggplot(df, aes(x = variable, y =  value)) +
   facet_wrap(~variable, scales = "free") +  theme_bw()
 ```
 
-Dado a natureza quantitativa dos dados, é de grande interesse que identifiquemos as relações entre as covariáveis explicativas e a variável resposta, a fim de tornar essas relações visuais, foi construido graficos de dispersão entre a variável resposta e entre todas as covariáveis de interesse. Estes estão representados na figura XX. 
+Dado a natureza quantitativa dos dados, é de grande interesse que identifiquemos as relações entre as covariáveis explicativas e a variável resposta. A fim de tornar essas relações visuais, foram construidos gráficos de dispersão entre a variável resposta e todas as covariáveis de interesse. Estes estão representados na figura 1. 
 
-```{r dispersao,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r dispersao,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #gráficos de dispersão
@@ -394,7 +420,7 @@ ggplot(dispersao, aes(x = value, y =  expvida)) +
 `r legenda_graf1` 
 \end{center}
 
-A partir da Figura 1, podemos identificar visualmente a relação supracitada, a qual identificamos que todas as covariáveis parecem ter uma relação linear significativa, as quais existem relações lineares negativas entre a variável resposta e as covariáveis "analf" e "crime", assim como relações lineares negativas entre a variável resposta "expvida" e as covariáveis "percap","estud","ndias" e "dens" (a menos a um ponto).
+A partir da Figura 1, podemos identificar visualmente a relação supracitada, a qual identificamos que todas as covariáveis parecem ter uma relação linear significativa. Existem relações lineares negativas entre a variável resposta "expvida" e as covariáveis "analf" e "crime", assim como relações lineares negativas entre a variável resposta "expvida" e as covariáveis "percap","estud","ndias" e "dens" (a menos a um ponto).
 
 \vspace{0.5cm}
 \begin{enumerate}
@@ -404,7 +430,7 @@ A partir da Figura 1, podemos identificar visualmente a relação supracitada, a
 \vspace{0.3cm}
 
 
-```{r padronizacao,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r padronizacao,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 
@@ -440,7 +466,7 @@ de estudantes que concluem o segundo grau (1970)" em uma unidade, mantendo-se as
 \item $\frac{\beta_6}{s_6}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "densidade da população estimada em julho de 1975 por área do estado em milhas quadradas" em uma unidade, mantendo-se as demais covariáveis fixas.  
 \end{itemize}
 
-```{r modelo completo,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r modelo completo,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #modelo padronizado completo
@@ -448,9 +474,12 @@ fit_max <- lm(expvida~1+percap+analf+crime+estud+ndias+dens,data=dados)
 
 res_fit_max = summary(fit_max)
 coeff_fit_max = res_fit_max$coefficients
-coeff_fit_max = data.frame(round(as.double(coeff_fit_max[,1]),4),round(as.double(coeff_fit_max[,2]),4),round(as.double(coeff_fit_max[,3]),4),ifelse(as.double(coeff_fit_max[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_max[,4]),4)))
 
-names(coeff_fit_max)=c("Estimativa","EP","Valor T","Valor p")
+IC_fit_max <- ICt_FIT(fit_max)
+coeff_fit_max = data.frame(round(as.double(coeff_fit_max[,1]),4),round(as.double(coeff_fit_max[,2]),4),IC_fit_max,round(as.double(coeff_fit_max[,3]),4),ifelse(as.double(coeff_fit_max[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_max[,4]),4)))
+
+names(coeff_fit_max)=c("Estimativa","EP","LI IC (.95)","LS IC (.95)","Valor T","Valor p")
+
 
 #medidas R2 e R2 ajustado do modelo fit_max
 R2_fit_max <- round(summary(fit_max)$r.squared,4)
@@ -468,10 +497,10 @@ mm_max = as.matrix(model.matrix(fit_max))
 
 ```
 
-Pode-se observar a partir das figuras 2 e 3 que o modelo não teve um ajuste adequado. No gráfico A não observação tendências,o que pode indicar uma independência dos dados. Já no gráfico B, observa-se uma leve heterocedasticidade, dado que entre os valores -2 e -1 de Valores Ajustados vê-se uma discrepâncias entre os resíduos studentizados do que entre os resíduos compreendidos entre os valores de -1 a 2. Porém, um fator de confundimento que pode ser levado em consideração é a flutuação amostral pois o banco de dados possui apenas cinquenta observações. é possível observar uma assimetria positiva no histograma apresentado (gráfico C da figura XX), assim como uma tendencia no gráfico de envelopes (figura XX) o que nos dá indícios de falta de normalidade nos resíduos. Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimétrica. Dado o escopo do curso, procede-se com as análises posteriores.
+Pode-se observar a partir da figura 1 que o modelo não teve um ajuste adequado. No gráfico A não observamos tendências,o que pode indicar uma independência dos dados. Já no gráfico B, observa-se uma leve heterocedasticidade, dado que os valores de resíduo studentizado parecem ser maiores em módulo conforme os valores ajustados aumentam. Porém, um fator de confundimento que pode ser levado em consideração é a assimetria da distribuição dos dados, já que é possível observar uma assimetria no histograma apresentado (gráfico C da figura 2), assim como uma tendencia no gráfico de envelopes (figura 3) o que nos dá indícios de falta de normalidade nos resíduos. Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimétrica, ou um modelo que leve em consideração heterocedásticidade. Dado o escopo do curso, procede-se com as análises posteriores.
 
 
-```{r residuos,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r residuos,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 # !!!acho que seria mais produtivo fazer análise de resíduos apenas para o modelo completo!!!
@@ -483,7 +512,7 @@ diag2norm(fit_max)
 `r legenda_graf2`
 \end{center}
 
-```{r envelope,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r envelope,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #gráfico de envelopes
@@ -494,23 +523,41 @@ envelnorm(fit_max)
 `r legenda_graf3`
 \end{center}
 
-Note, pela tabela 2 (lembrando que os valores da tabela estão arredondados em quatro casas decimais) que somente os parêmetros relacionados às covariáveis "crime", "ndias" e "dens" significativos à um nível de significancia = 0,10. A partir desse resultado, temos a indicação de que um modelo reduzido pode ser mais apropriado. Contudo, desejamos também, obter o modelo que melhor se ajusta aos dados.
+Note, pela tabela 2, que somente o intercepto ($\beta_0$) e os parêmetros relacionados às covariáveis "crime", "ndias" e "dens" ($\beta_3$,$\beta_5$ e $\beta_6$) são significativos à um nível de significância de 10%. A partir desse resultado, temos a indicação de que um modelo reduzido pode ser mais apropriado. Contudo, desejamos também, obter o modelo que melhor se ajusta aos dados.
 
 \begin{center}
 `r legenda_table2`
 \end{center}
 
-```{r coeficientes para fit_max,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r coeficientes para fit_max,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #pacote para produzir tabela em latex
 library(knitr)
 
-# !!! depois editar!!!
-#coeficientes e R^2 e R^2 ajustado
 
-kable(coeff_fit_max)
+library(printr)
+library(xtable)
+
+#coeficientes e R^2 e R^2 ajustado
+#xtable(coeff_fit_max,digits = 4)
 
 ```
 
+\begin{table}[!h]
+\centering
+\begin{tabular}{ccccccl}
+  \hline
+ Parâmetro & Estimativa & EP & IC (95$\%$) & Valor T & Valor p \\ 
+  \hline
+  $\beta_0$ & 70,8786 & 0,1039 & [70,6691 ; 71,0881] & 682,2147 & $<$0,0001 \\ 
+  $\beta_1$ & 0,1352 & 0,1404 & [-0,1479 ; 0,4183] & 0,9631 & 0,3409 \\ 
+  $\beta_2$ & -0,0322 & 0,2010 & [-0,4375 ; 0,3731] & -0,1601 & 0,8735 \\ 
+  $\beta_3$ & -1,0618 & 0,1527 & [-1,3697 ; -0,7538] & -6,9535 & $<$0,0001 \\ 
+  $\beta_4$ & 0,2455 & 0,1673 & [-0,0918 ; 0,5829] & 1,4677 & 0,1495 \\ 
+  $\beta_5$ & -0,3907 & 0,1444 & [-0,6818 ; -0,0995] & -2,7058 & 0,0097 \\ 
+  $\beta_6$ & -0,2108 & 0,1139 & [-0,4404 ; 0,0188] & -1,8518 & 0,0709 \\ 
+  \hline
+\end{tabular}
+\end{table}
 
 
 3.1 Seleção dos modelos
@@ -519,14 +566,14 @@ kable(coeff_fit_max)
 
 A técnica escolhida para nos auxiliar a selecionar o modelo normal linear homocedastico que melhor se ajusta aos dados foi a técnica stepwise, veja Azevedo (2016).
 
-```{r modelo intercepto,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r modelo intercepto,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #modelo padronizado só com o intercepto
 fitmin <- lm(expvida~1,data = dados)
 ```
 
-```{r stepwisemin,cache = TRUE,echo=FALSE, warning = FALSE,eval = FALSE,message = FALSE}
+```{r stepwisemin,cache = FALSE,echo=FALSE, warning = FALSE,eval = FALSE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 #eval = FALSE faz com que o R ignore este chunk
 
@@ -535,7 +582,7 @@ step_min <- step(fitmin,scope = list(upper=fit_max),direction = "both")
 
 ```
 
-```{r stepwisemax,cache = TRUE,echo=FALSE, warning = FALSE,eval=FALSE,message = FALSE}
+```{r stepwisemax,cache = FALSE,echo=FALSE, warning = FALSE,eval=FALSE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 #eval = FALSE faz com que o R ignore este chunk
 
@@ -547,7 +594,7 @@ step_max <- step(fit_max,scope = list(lower=fitmin),direction = "both")
 
 A aplicação da metodologia stepwise, començando com o modelo só
 com o intercepto ou começando com o modelo completo, indicou,
-em ambos os casos que o modelo com que melhor se ajusta é o modelo que leva em consideração somente as covariáveis "crime","estud","ndias" e "dens".
+em ambos os casos, que o modelo o qual melhor se ajusta é o modelo que leva em consideração somente as covariáveis "crime","estud","ndias" e "dens".
 
 Temos agora o seguinte modelo:
 
@@ -573,18 +620,20 @@ Onde  $\varepsilon_{i} \overset{i.i.d.}{\sim} N(0,\sigma^2)$ , $x_j=\frac{1}{50}
 \item $\frac{\beta_6}{s_6}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "densidade da população estimada em julho de 1975 por área do estado em milhas quadradas" em uma unidade, mantendo-se as demais covariáveis fixas.
 \end{itemize}
 
-```{r Modelo Otimo,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r Modelo Otimo,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #modelo "ótimo" segundo o stepwise
 
 fit_otimo <- lm(expvida ~ crime + estud + ndias + dens, data = dados)
 
+
 res_fit_otimo= summary(fit_otimo)
 coeff_fit_otimo= res_fit_otimo$coefficients
-coeff_fit_otimo= data.frame(round(as.double(coeff_fit_otimo[,1]),4),round(as.double(coeff_fit_otimo[,2]),4),round(as.double(coeff_fit_otimo[,3]),4),ifelse(as.double(coeff_fit_otimo[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_otimo[,4]),4)))
+IC_fit_otimo <- ICt_FIT(fit_otimo)
+coeff_fit_otimo= data.frame(round(as.double(coeff_fit_otimo[,1]),4),round(as.double(coeff_fit_otimo[,2]),4),IC_fit_otimo,round(as.double(coeff_fit_otimo[,3]),4),ifelse(as.double(coeff_fit_otimo[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_otimo[,4]),4)))
 
-names(coeff_fit_otimo)=c("Estimativa","EP","Valor T","Valor p")
+names(coeff_fit_otimo)=c("Estimativa","EP","LI IC (95%)","LS IC (95%)","Valor T","Valor p")
 
 #Medidas R2 e R2 ajustado do modelo otimo com intercepto
 
@@ -598,10 +647,10 @@ rownames(medidas_fit_otimo)=c("AIC","BIC","Log-Verossimilhança","R2","R2 ajusta
 mm = as.matrix(model.matrix(fit_otimo))
 ```
 
-Em anuência ao ajuste do modelo anterior, este modelo também não apresentou um ajuste adequado, uma vez que se observa nas figuras YY e XX indícios de mal ajuste semelhantes aos observados na análise residual para o modelo anterior. Porém uma ressalva pode ser feita de que no gráfico B pode-se observar que as discrepâncias entre os resíduos mudam conforme o valor ajustado aumenta   
-Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimetrica. Novamente, dado o escopo do curso, procede-se com as análises posteriores.
+Em anuência ao ajuste do modelo anterior, este modelo também não apresentou um ajuste adequado, uma vez que se observa na figura 4 indícios de mal ajuste semelhantes aos observados na análise residual para o modelo anterior. A tendência no gráfico B indica heterocedasticidade dos resíduos e as tendências observadas nos gráfico C (Assimetria da distribuição) e na figura 5 (tendência nos envelopes) indicam a falta de normalidade nos resíduos.     
+Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimetrica, ou um modelo que leve em consideração heterocedásticidade. Novamente, dado o escopo do curso, procede-se com as análises posteriores.
 
-```{r residuos modelo otimo,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r residuos modelo otimo,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #grpaficos para análise de resíduos
@@ -612,7 +661,7 @@ diag2norm(fit_otimo)
 `r legenda_graf4`
 \end{center}
 
-```{r envelope modelo otimo,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r envelope modelo otimo,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #gráfico de envelopes
@@ -623,107 +672,49 @@ envelnorm(fit_otimo)
 `r legenda_graf5`
 \end{center}
 
-Note que a tabela acima acusa que o parâmetro $\beta_0$ não é significativo no modelo para um nível de significância de 0,10. Sendo assim, vamos ajustar o modelo anterior sem intercepto. 
-
-Modelo 3:
-
-$$
-Y_i = \sum_{j=3}^{6}\beta_j \left (\frac{x_{ji}-\bar{x_j}}{s_j}   \right ) + \varepsilon_{i}\left\{\begin{matrix}
-i= 1,\dots,50 \\ 
-j=  3,\dots,6
-\end{matrix}\right.
-$$
-\indent
-Onde  $\varepsilon_{i} \overset{i.i.d.}{\sim} N(0,\sigma^2)$ , $x_j=\frac{1}{50}\sum_{i=1}^{50}x_ji$ e  $s_j=\sqrt{\frac{1}{50}\sum_{i=1}^{50}(x_{ji}-\bar{x_j})^2}$
-
-\vspace{0.3cm}
-\begin{itemize}
-\item$Y_i$ : Expectativa de vida em anos (1969-70).  
-\item $\frac{\beta_3}{s_3}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "taxa de criminalidade (por 100000 habitantes 1976)" em uma unidade, mantendo-se as demais covariáveis fixas.  
-
-\item $\frac{\beta_4}{s_4}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "porcentagem de estudantes que concluem o segundo grau (1970)" em uma unidade, mantendo-se as demais covariáveis fixas.  
-
-\item $\frac{\beta_5}{s_5}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor de "número de dias do ano com temperatura abaixo de zero grau Celsus na cidade mais importante do estado" em uma unidade, mantendo-se as demais covariáveis fixas.  
-
-\item $\frac{\beta_6}{s_6}$ : Incremento (positivo ou negativo) na expectativa de vida em anos (1969-70) esperada quando se aumenta o valor da "densidade da população estimada em julho de 1975 por área do estado em milhas quadradas" em uma unidade, mantendo-se as demais covariáveis fixas. 
-
-\end{itemize}
-
-```{r Modelo Otimo Sem intercepto,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
-#echo = FALSE não permite que o chunk apareça no pdf
-
-#modelo "ótimo" sem o intercepto
-
-fit_otimoS <- lm(expvida ~ -1 + crime + estud + ndias + dens, data = dados)
-
-res_fit_otimoS= summary(fit_otimoS)
-coeff_fit_otimoS= res_fit_otimoS$coefficients
-coeff_fit_otimoS= data.frame(round(as.double(coeff_fit_otimoS[,1]),4),round(as.double(coeff_fit_otimoS[,2]),4),round(as.double(coeff_fit_otimoS[,3]),4),ifelse(as.double(coeff_fit_otimoS[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_otimoS[,4]),4)))
-
-names(coeff_fit_otimoS)=c("Estimativa","EP","Valor T","Valor p")
-
-#Medidas R2 e R2 ajustado do modelo otimo sem intercepto
-R2_fit_otimoS <- round(summary(fit_otimoS)$r.squared,4)
-R2aj_fit_otimoS <- round(summary(fit_otimoS)$adj.r.squared,4)
-
-# Estatísticas para comparação de modelos
-medidas_fit_otimoS = data.frame(rbind(AIC(fit_otimoS),BIC(fit_otimoS),logLik(fit_otimoS),R2_fit_otimoS,R2aj_fit_otimoS))
-colnames(medidas_fit_otimoS)=c("Modelo 3")
-rownames(medidas_fit_otimoS)=c("AIC","BIC","Log-Verossimilhança","R2","R2 ajustado")
-
-mm = as.matrix(model.matrix(fit_otimoS))
+```{r cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+# mudei (acrescentei esse chunk)
+#xtable(coeff_fit_otimo,digits = 4)
 ```
 
-
-
-```{r residuos modelo otimo sem intercepto,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
-#echo = FALSE não permite que o chunk apareça no pdf
-
-#grpaficos para análise de resíduos
-diag2norm(fit_otimoS)
-```
-
-\begin{center}
-`r legenda_graf6`
-\end{center}
-
-```{r envelope modelo otimo sem intercepto,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
-#echo = FALSE não permite que o chunk apareça no pdf
-
-#gráfico de envelopes
-envelnorm(fit_otimoS)
-```
-
-\begin{center}
-`r legenda_graf7`
-\end{center}
-
-A tabela XX abaixo mostra as principais medidas de comparação entre os dois últimos modelos (com e sem intercepto). Observamos nela, valores menores de AIC e BIC para o modelo sem intercepto, o que nos da uma indicação de que o modelo sem intercepto é preferível.
+Note, pela tabela 3  que todos os parâmetros do modelo são significativos a qualquer nível de significância usual (0,01 a 0,1). Portanto, temos indícios de que este é o modelo mais reduzido que, neste caso, pode-se ter sem perder poder preditivo do modelo. Vamos então, a partir deste ponto, analisar outros aspectos relacionados ao modelo que teve melhor ajuste.
 
 \begin{center}
 `r legenda_table3`
 \end{center}
-```{r comparacao modelo otimo c e s intercepto,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
-library(knitr)
-#dados para gerar a tabela de comparação dos modelos com e sem intercepto
-tbl_comparacao <- cbind(medidas_fit_otimo,medidas_fit_otimoS)
-as.data.frame(tbl_comparacao)
-```
 
+\begin{table}[!h]
+\centering
+\begin{tabular}{ccccccl}
+  \hline
+ & Estimativa & EP & IC (95$\%$) & Valor T & Valor p \\ 
+  \hline
+$\beta_0$ & 70.8786 & 0.1028 & [70.6716 ; 71.0856] & 689.6565 & $<$0.0001 \\ 
+  $\beta_3$ & -1.0553 & 0.1328 & [-1.3228 ; -0.7878] & -7.9456 & $<$0.0001 \\ 
+  $\beta_4$ & 0.3526 & 0.1236 & [0.1035 ; 0.6016] & 2.8516 & 0.0065 \\ 
+  $\beta_5$ & -0.3712 & 0.1247 & [-0.6223 ; -0.1201] & -2.9774 & 0.0047 \\ 
+  $\beta_6$ & -0.1882 & 0.1079 & [-0.4055 ; 0.0292] & -1.7439 & 0.088 \\ 
+   \hline
+\end{tabular}
+\end{table}
+  
 
 #Multicolinearidade
 
-Mesmo o modelo não apresentando muitas covariáveis, é interessante, a fim de assegurar a validade dos resultados obtidos (desconsidere que o modelo não teve um bom ajuste), verificar também a possibilidade de se ter multicolinearidade presente no modelo ajustado. Com o propósito de identificar alguma indicação de multicolinearidade no modelo, podemos análisar os coeficiêntes de corelação linear entre as covariáveis "crime", "estud", "ndias" e "dens". Porém, observamos na tabela XX (abaixo) que nenhum par de covariáveis apresenta coeficiente de correlação deveras alto, assim como a natureza das covariáveis presentes no medelo não apresentarem nenhum indício de serem fontes de multicolinearidade.
+Mesmo o modelo 2 não apresentando muitas covariáveis, é interessante, a fim de assegurar a validade dos resultados obtidos (desconsidere que o modelo não teve um bom ajuste), verificar também a possibilidade de se ter multicolinearidade presente no modelo ajustado. Com o propósito de identificar alguma indicação de multicolinearidade no modelo, podemos análisar os coeficiêntes de corelação linear entre as covariáveis "crime", "estud", "ndias" e "dens". Porém, observamos na tabela 4 (abaixo) que nenhum par de covariáveis apresenta coeficiente de correlação deveras alto. Aliás, a natureza das covariáveis presentes no medelo não apresentarem nenhum indício de serem fontes de multicolinearidade.
 
 \begin{center}
 `r legenda_table4`
 \end{center}
-```{r,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #Análise de multicolineariedade descritivamente
 
 #pegando só as variáveis do modelo otimo
 dados_modelo_otimo <- dados[,3:6]
-cor(dados_modelo_otimo)
+
+correlacao <- round(cor(dados_modelo_otimo),4)
+#xtable(correlacao,digits = 4)
+
 
 #Verificação dos autovalores
 
@@ -733,152 +724,218 @@ indcond <- round(max(autval)/min(autval),4)
 
 ```
 
-Além disso, Sabe-se que se a razão entre o maior autovalor ($\lambda_{max}$) e o menor ($\lambda_{min}$) (o chamado índice de condição) $K=\frac{\lambda_{max}}{\lambda_{min}}$ for maior que mil, geralmente, há indicios de multicolinearidade. Fazendo isso para o caso do problema em questão, tem-se que: $K=$ `r indcond`. Como $K < 1000$, portanto descartaremos a hipótese de multicolinearidade dos dados.
+\begin{table}[!h]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & crime & estud & ndias & dens \\ 
+  \hline
+crime & 1,0000 & -0,4880 & -0,5389 & 0,1110 \\ 
+  estud & -0,4880 & 1,0000 & 0,3668 & -0,2668 \\ 
+  ndias & -0,5389 & 0,3668 & 1,0000 & -0,1329 \\ 
+  dens & 0,1110 & -0,2668 & -0,1329 & 1,0000 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
+Além disso, sabe-se que se a razão entre o maior autovalor ($\lambda_{max}$) e o menor autovalor ($\lambda_{min}$) da matriz $X^{t}$X (o chamado índice de condição) $K=\frac{\lambda_{max}}{\lambda_{min}}$ for maior que mil, geralmente, há indicios de multicolinearidade (veja Azevedo(2016)). Fazendo isso para o caso do problema em questão, tem-se que: $K=$ `r indcond`. Como $K < 1000$, portanto descartaremos a hipótese de multicolinearidade dos dados.
 
 
 #Alavancagem
 
 Observando a figura XX podemos identificar a existência de pontos distantes dos demais, o que é uma indicação de alavancagem.
 
-```{r alavancagem,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r alavancagem,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #medidas de influência e alavancagem
 
-anainflu_norm(fit_otimoS)
+anainflu_norm(fit_otimo)
+```
+\begin{center}
+`r legenda_graf6`
+\end{center}
+
+
+```{r valores_alavancagem, cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+valores = anainflu_ind(fit_otimo)
+
+indh = round(as.integer(valores[1]),4)
+
+vh = round(as.double(valores[2]),4)
+
+inddi1 = round(as.integer(valores[3]),4)
+
+inddi2 = round(as.integer(valores[4]),4)
+
+vdi1 = round(as.double(valores[5]),4)
+
+vdi2 = round(as.double(valores[6]),4)
+
+
+```
+
+Vemos para o gráfico de Medida h, o ponto que se destaca é o de indice `r indh`, com valor de `r vh`. Já no de Distânca de Cook, temos dois pontos em destaque: um é o do mesmo indice, com valor `r vdi2`, outro ponto é o de indice `r inddi1`, com valor `r vdi1`.
+
+Logo, como identificamos esses pontos, vamos montar um modelo excluindo, primeiramente a observação mais discrepante, e depois excluindo ambas as observações discrepantes, ou seja, repetimos o modelo anterior, excluindo-se da base de dados a observação de indice 40, pois esta foi identificada como a mais discrepante, a qual possívelmente têm influência significativa no modelo. Caso ocorra uma melhora de ajuste, faremos o mesmo, excluíndo-se agora também o outro ponto de indice 11, identificado pela Distância de Cook.
+Intitularemos o modelo sem a observação 40 como "Modelo 3" e o modelo sem as observações 40 e 11 como "Modelo 4".
+
+Segue abaixo os gráficos para análise residual do modelo sem a observação 40 ("Modelo 3").
+
+```{r fit_otimo_adj1,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+
+fit_otimo_adj1 <- lm(expvida ~ crime + estud + ndias + dens, data = dados[-40,])
+
+
+res_fit_otimo_adj1 = summary(fit_otimo_adj1)
+coeff_fit_otimo_adj1 = res_fit_otimo_adj1$coefficients
+coeff_fit_otimo_adj1 = data.frame(round(as.double(coeff_fit_otimo_adj1[,1]),4),round(as.double(coeff_fit_otimo_adj1[,2]),4),round(as.double(coeff_fit_otimo_adj1[,3]),4),ifelse(as.double(coeff_fit_otimo_adj1[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_otimo_adj1[,4]),4)))
+
+names(coeff_fit_otimo_adj1)=c("Estimativa","EP","Valor T","Valor p")
+
+#Medidas R2 e R2 ajustado do modelo fit_otimo_adj1
+R2_fit_otimo_adj1 <- round(summary(fit_otimo_adj1)$r.squared,4)
+R2aj_fit_otimo_adj1 <- round(summary(fit_otimo_adj1)$adj.r.squared,4)
+# Estatísticas para comparação de modelos
+medidas_fit_otimo_adj1 = data.frame(rbind(AIC(fit_otimo_adj1),BIC(fit_otimo_adj1),logLik(fit_otimo_adj1),R2_fit_otimo_adj1,R2aj_fit_otimo_adj1))
+colnames(medidas_fit_otimo_adj1)=c("Modelo 3")
+rownames(medidas_fit_otimo_adj1)=c("AIC","BIC","Log-Verossimilhança","R2","R2 ajustado")
+
+
+
+mm_adj1 = as.matrix(model.matrix(fit_otimo_adj1))
+```
+
+Note, pelas figuras 7 e 8 que a análise de resíduos, salvo à mínimos detalhes, continua a mesma da análise apresentada para o Modelo 2, ou seja, mesmo retirando a observação de indice 40 da base de dados, o modelo continua com o mesmo ajuste inadequado.
+
+```{r residuos modelo otimo ajustado 1,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+#echo = FALSE não permite que o chunk apareça no pdf
+
+#grpaficos para análise de resíduos
+diag2norm(fit_otimo_adj1)
+```
+\begin{center}
+`r legenda_graf7`
+\end{center}
+
+```{r envelope modelo otimo ajustado 1,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+#echo = FALSE não permite que o chunk apareça no pdf
+
+#gráfico de envelopes
+envelnorm(fit_otimo_adj1)
 ```
 \begin{center}
 `r legenda_graf8`
 \end{center}
 
+Como se pode observar na tabela 5, ocorreu uma mudança significativa nos valores das medidas apresentadas na tabela, ou seja, existe indícios de que a observação 40 têm grande influência no modelo. Vamos então ajustar um modelo agora sem as observações 40 e 11 para avaliar as mudanças causadas em relação a este modelo (modelo 3).
 
-```{r valores_alavancagem, cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
-valores = anainflu_ind(fit_otimoS)
+```{r}
+medidas_comp_model1 = data.frame(medidas_fit_max,medidas_fit_otimo, medidas_fit_otimo_adj1)
 
-indh = as.integer(valores[1])
-
-vh = as.double(valores[2])
-
-inddi1 = as.integer(valores[3])
-
-inddi2 = as.integer(valores[4])
-
-vdi1 = as.double(valores[5])
-
-vdi2 = as.double(valores[6])
-
+colnames(medidas_comp_model1) <- c("Modelo 1","Modelo 2","Modelo 3")
+#xtable(medidas_comp_model1,digits = 4)
 ```
+\begin{center}
+`r legenda_table5`
+\end{center}
 
-Vemos para o gráfico de Medida h, o ponto que se destaca é o de indice `r indh`, com valor de `r vh`. Já no de Distânca de Cook, temos dois pontos em destaque: um é o do mesmo indice,com valor `r vdi2`, coomparações entre os valores das duas medidas não consistentes e portanto inválidas, outro ponto é o de indice `r inddi1`, com valor `r vdi1`.
+\begin{table}[!h]
+\centering
+\begin{tabular}{rrrr}
+  \hline
+ & Modelo 1 & Modelo 2 & Modelo 3 \\ 
+  \hline
+AIC & 119,5163 & 116,7045 & 110,0140 \\ 
+  BIC & 134,8125 & 128,1766 & 121,2412 \\ 
+  Log-Verossimilhança & -51,7581 & -52,3522 & -49,0070 \\ 
+  R2 & 0,7372 & 0,7309 & 0,7008 \\ 
+  R2 ajustado & 0,7005 & 0,7069 & 0,6729 \\ 
+   \hline
+\end{tabular}
+\end{table}
 
-Logo, como identificamos esses pontos, vamos montar um modelo reduzido, como feito acima mas excluindo primeiramente as observações de indice 40 pois nos dois caso é o ponto mais elevado, possívelmente o que mais influência no modelo. caso ocorra uma melhora de ajuste, faremos para o outro identificado pela Distância de Cook.
 
-Segue abaixo o ajuste do modelo sem aa observações 11 e 40
+Segue abaixo os gráficos para análise residual do modelo sem as observações 40 e 11 ("Modelo 4").
 
-```{r fit_otimoS_adj1,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r fit_otimo_adj2,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 
-fit_otimoS_adj1 <- lm(expvida ~ -1 + crime + estud + ndias + dens, data = dados[-c(11,40),])
+fit_otimo_adj2 <- lm(expvida ~ crime + estud + ndias + dens, data = dados[-c(11,40),])
 
+res_fit_otimo_adj2 = summary(fit_otimo_adj2)
+coeff_fit_otimo_adj2 = res_fit_otimo_adj2$coefficients
+coeff_fit_otimo_adj2 = data.frame(round(as.double(coeff_fit_otimo_adj2[,1]),4),round(as.double(coeff_fit_otimo_adj2[,2]),4),round(as.double(coeff_fit_otimo_adj2[,3]),4),ifelse(as.double(coeff_fit_otimo_adj2[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_otimo_adj2[,4]),4)))
 
-res_fit_otimoS_adj1 = summary(fit_otimoS_adj1)
-coeff_fit_otimoS_adj1 = res_fit_otimoS_adj1$coefficients
-coeff_fit_otimoS_adj1 = data.frame(round(as.double(coeff_fit_otimoS_adj1[,1]),4),round(as.double(coeff_fit_otimoS_adj1[,2]),4),round(as.double(coeff_fit_otimoS_adj1[,3]),4),ifelse(as.double(coeff_fit_otimoS_adj1[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_otimoS_adj1[,4]),4)))
+names(coeff_fit_otimo_adj1)=c("Estimativa","EP","Valor T","Valor p")
 
-names(coeff_fit_otimoS_adj1)=c("Estimativa","EP","Valor T","Valor p")
+#Medidas R2 e R2 ajustado do modelo fit_otimo_adj2
+R2_fit_otimo_adj2 <- round(summary(fit_otimo_adj2)$r.squared,4)
+R2aj_fit_otimo_adj2 <- round(summary(fit_otimo_adj2)$adj.r.squared,4)
 
-#Medidas R2 e R2 ajustado do modelo fit_otimoS_adj1
-R2_fit_otimoS_adj1 <- round(summary(fit_otimoS_adj1)$r.squared,4)
-R2aj_fit_otimoS_adj1 <- round(summary(fit_otimoS_adj1)$adj.r.squared,4)
 # Estatísticas para comparação de modelos
-medidas_fit_otimoS_adj1 = data.frame(rbind(AIC(fit_otimoS_adj1),BIC(fit_otimoS_adj1),logLik(fit_otimoS_adj1),R2_fit_otimoS_adj1,R2aj_fit_otimoS_adj1))
-colnames(medidas_fit_otimoS_adj1)=c("Modelo 4")
-rownames(medidas_fit_otimoS_adj1)=c("AIC","BIC","Log-Verossimilhança","R2","R2 ajustado")
+medidas_fit_otimo_adj2 = data.frame(rbind(AIC(fit_otimo_adj2),BIC(fit_otimo_adj2),logLik(fit_otimo_adj2),R2_fit_otimo_adj2,R2aj_fit_otimo_adj2))
+colnames(medidas_fit_otimo_adj2)=c("Modelo 4")
+rownames(medidas_fit_otimo_adj2)=c("AIC","BIC","Log-Verossimilhança","R2","R2 ajustado")
 
 
 
-mm_adj1 = as.matrix(model.matrix(fit_otimoS_adj1))
+mm_adj1 = as.matrix(model.matrix(fit_otimo_adj1))
 ```
 
-```{r residuos modelo otimo ajustado 1,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+Note, pelas figuras 9 e 10 que a análise de resíduos, salvo à mínimos detalhes, continua a mesma da análise apresentada para o Modelo 2, ou seja, mesmo retirando as observação de indices 40 e 11 da base de dados, o modelo continua com o mesmo ajuste inadequado.
+
+```{r residuos modelo otimo ajustado 2,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #grpaficos para análise de resíduos
-diag2norm(fit_otimoS_adj1)
+diag2norm(fit_otimo_adj2)
 ```
 \begin{center}
 `r legenda_graf9`
 \end{center}
 
-```{r envelope modelo otimo ajustado 1,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r envelope modelo otimo ajustado 2,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #gráfico de envelopes
-envelnorm(fit_otimoS_adj1)
+envelnorm(fit_otimo_adj2)
 ```
 \begin{center}
 `r legenda_graf10`
 \end{center}
 
-```{r fit_otimoS_adj2,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
-
-fit_otimoS_adj2 <- lm(expvida ~ -1 + crime + estud + ndias + dens, data = dados[-c(11,40),])
-
-res_fit_otimoS_adj2 = summary(fit_otimoS_adj2)
-coeff_fit_otimoS_adj2 = res_fit_otimoS_adj2$coefficients
-coeff_fit_otimoS_adj2 = data.frame(round(as.double(coeff_fit_otimoS_adj2[,1]),4),round(as.double(coeff_fit_otimoS_adj2[,2]),4),round(as.double(coeff_fit_otimoS_adj2[,3]),4),ifelse(as.double(coeff_fit_otimoS_adj2[,4]) < 0.0001, "<0.0001", round(as.double(coeff_fit_otimoS_adj2[,4]),4)))
-
-names(coeff_fit_otimoS_adj1)=c("Estimativa","EP","Valor T","Valor p")
-
-#Medidas R2 e R2 ajustado do modelo fit_otimoS_adj2
-R2_fit_otimoS_adj2 <- round(summary(fit_otimoS_adj2)$r.squared,4)
-R2aj_fit_otimoS_adj2 <- round(summary(fit_otimoS_adj2)$adj.r.squared,4)
-
-# Estatísticas para comparação de modelos
-medidas_fit_otimoS_adj2 = data.frame(rbind(AIC(fit_otimoS_adj2),BIC(fit_otimoS_adj2),logLik(fit_otimoS_adj2),R2_fit_otimoS_adj2,R2aj_fit_otimoS_adj2))
-colnames(medidas_fit_otimoS_adj2)=c("Modelo 5")
-rownames(medidas_fit_otimoS_adj2)=c("AIC","BIC","Log-Verossimilhança","R2","R2 ajustado")
-
-
-
-mm_adj1 = as.matrix(model.matrix(fit_otimoS_adj1))
-```
-
-```{r residuos modelo otimo ajustado 2,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
-#echo = FALSE não permite que o chunk apareça no pdf
-
-#grpaficos para análise de resíduos
-diag2norm(fit_otimoS_adj2)
-```
-\begin{center}
-`r legenda_graf11`
-\end{center}
-
-```{r envelope modelo otimo ajustado 2,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
-#echo = FALSE não permite que o chunk apareça no pdf
-
-#gráfico de envelopes
-envelnorm(fit_otimoS_adj2)
-```
-\begin{center}
-`r legenda_graf12`
-\end{center}
+Note agora, que não ocorreram mudanças significativas nos valores das medidas apresentadas pela tabela 5 deste modelo (modelo 4) com relação aos valores das medidas do modelo anterior (modelo 3), portanto, não existem indícios de que a observação 11 tenha grande influência no modelo.
 
 \begin{center}
-`r legenda_table5`
+`r legenda_table6`
 \end{center}
-```{r tabela de comparcao modelos,cache = TRUE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r tabela de comparcao modelos,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #medidas_fit_max
 #medidas_fit_otimo
-#medidas_fit_otimoS
-#medidas_fit_otimoS_adj1
-#medidas_fit_otimoS_adj2
+#medidas_fit_otimo_adj1
+#medidas_fit_otimo_adj2
 
-medidas_comp_model = data.frame(medidas_fit_max,medidas_fit_otimo,medidas_fit_otimoS, medidas_fit_otimoS_adj1,medidas_fit_otimoS_adj2)
+medidas_comp_model2 = data.frame(medidas_fit_max,medidas_fit_otimo, medidas_fit_otimo_adj1,medidas_fit_otimo_adj2)
 
-medidas_comp_model
+colnames(medidas_comp_model2) <- c("Modelo 1","Modelo 2","Modelo 3","Modelo 4")
+#xtable(medidas_comp_model2,digits = 4)
 
 ```
-
+\begin{table}[!h]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & Modelo 1 & Modelo 2 & Modelo 3 & Modelo 4 \\ 
+  \hline
+AIC & 119,5163 & 116,7045 & 110,0140 & 110,0140 \\ 
+  BIC & 134,8125 & 128,1766 & 121,2412 & 121,2412 \\ 
+  Log-Verossimilhança & -51,7581 & -52,3522 & -49,0070 & -49,0070 \\ 
+  R2 & 0,7372 & 0,7309 & 0,7008 & 0,7008 \\ 
+  R2 ajustado & 0,7005 & 0,7069 & 0,6729 & 0,6729 \\ 
+   \hline
+\end{tabular}
+\end{table}
+  
 \newpage
 \vspace{0.5cm}
 \begin{enumerate}
@@ -887,12 +944,14 @@ medidas_comp_model
 \end{enumerate}
 \vspace{0.3cm}
 
-Como visto, nenhum modelo destes propostos teve um bom ajuste ao conjunto de dados não obstante utilizaremos o modelo quatro pois é o que apresenta as  melhores estimativas de comparação de modelo, ou seja baixo AIC E BIC, alta Log-Verossimilhança. Podemos observar também que há uma relaç
+Como visto, nenhum modelo destes propostos teve um bom ajuste ao conjunto de dados, não obstante, dado o escopo do curso, e dados os resultados mensionados anteriormente, consideramos que o modelo 3 foi o que teve ajuste mais satisfatório, pois é o que apresenta as melhores estimativas de comparação de modelo, ou seja valores baixos para AIC e BIC, e alto valor de Log-Verossimilhança, embora tenha valores de R2 e R2 ajustado menores que os valores apresentados para os modelos 1 e 2. Quanto aos valores das estatísticas apresentados na tabela 5, os modelos 3 e 4 são similares, porém o modelo 4 exclui uma observação desnecessariamente. Porém, levando-se em consideração que não estamos em contato com o experimentador, e por isso não teremos um entendimento maior quanto aos dados, não sabemos se a exclusão da observação 40 é válida, ou não, para produzir um modelo mais adequado.
+
+\newpage
 
 \vspace{0.5cm}
 \begin{enumerate}
 \setcounter{enumi}{4}
-\item Referências Bibliográficas
+\item Referências Bibliográficas e Eletrônicas
 \end{enumerate}
 
 \vspace{0.3cm}
