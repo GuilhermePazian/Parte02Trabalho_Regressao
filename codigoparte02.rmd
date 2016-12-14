@@ -126,11 +126,12 @@ legenda_graf2 = figs(name="graf2_residuos",caption = "Análise de Resíduo para 
 legenda_graf3 = figs(name="graf3_residuos",caption = "Gráfico de envelope para os resíduos studentizado para o modelo 1")
 legenda_graf4 = figs(name="graf4_residuos",caption = "Análise residual para o modelo 2")
 legenda_graf5 = figs(name="graf5_envelope",caption = "Gráfico de envelope para os resíduos studentizado para o modelo 2")
-legenda_graf6 = figs(name="anainflu_norm(fit_otimo)",caption = "Pontos alavanca e distância de Cook")
-legenda_graf7 = figs(name="diag2norm(fit_otimo_adj1)",caption = "Análise residual para o modelo 3")
-legenda_graf8 = figs(name="envelnorm(fit_otimo_adj1)",caption = "Gráfico de envelope para os resíduos studentizado para o modelo 3")
-legenda_graf9 = figs(name="diag2norm(fit_otimo_adj2)",caption = "Análise residual para o modelo 4")
-legenda_graf10 = figs(name="envelnorm(fit_otimo_adj2)",caption = "Gráfico de envelope para os resíduos studentizado para o modelo 4")
+legenda_graf6 = figs(name="grafico_correlacao",caption = "Gráfico de correlação")
+legenda_graf7 = figs(name="anainflu_norm(fit_otimo)",caption = "Pontos alavanca e distância de Cook")
+legenda_graf8 = figs(name="diag2norm(fit_otimo_adj1)",caption = "Análise residual para o modelo 3")
+legenda_graf9 = figs(name="envelnorm(fit_otimo_adj1)",caption = "Gráfico de envelope para os resíduos studentizado para o modelo 3")
+legenda_graf10 = figs(name="diag2norm(fit_otimo_adj2)",caption = "Análise residual para o modelo 4")
+legenda_graf11 = figs(name="envelnorm(fit_otimo_adj2)",caption = "Gráfico de envelope para os resíduos studentizado para o modelo 4")
 
 ```
 
@@ -322,15 +323,15 @@ O conjunto de dados a ser analisado está disponível na página do curso sob o 
 Todos os modelos neste trabalho foram ajustados via metodologia de mínimos quadrados ordinários, veja Azevedo (2016), e todas suas respectivas análises residuais foram realizadas, conforme Paula (2013).
 A menos que seja citado o contrário, todas as variáveis que constam na base de dados serão referidas por sua descrição completa ou pelo nome que consta no banco de dados (estes foram supracitados em negrito). Denotaremos também:
  
-\noindent  
-$Y_i$ - i-ésima observação da variável expvida  
-$x_{1i}$ - i-esima observação da variável percap  
-$x_{2i}$ - i-esima observação da variável analf  
-$x_{3i}$ - i-esima observação da variável crime  
-$x_{4i}$ - i-esima observação da variável estud  
-$x_{5i}$ - i-esima observação da variável ndias  
-$x_{6i}$ - i-esima observação da variável dens  
-
+\begin{itemize}
+\item $Y_i$ - i-ésima observação da variável expvida  
+\item $x_{1i}$ - i-esima observação da variável percap  
+\item $x_{2i}$ - i-esima observação da variável analf  
+\item $x_{3i}$ - i-esima observação da variável crime  
+\item $x_{4i}$ - i-esima observação da variável estud  
+\item $x_{5i}$ - i-esima observação da variável ndias  
+\item $x_{6i}$ - i-esima observação da variável dens  
+\end{itemize}
 \vspace{0.5cm}
 
 OBS: Todas as análises presentes neste trabalho foram obtidas com auxílio dos softwares "R" e "RStudio". Ambos são gratuitos e estão disponíveis nos sites *[https://cran.r-project.org/index.html]("https://cran.r-project.org/index.html")* e *[https://www.rstudio.com/products/rstudio/download/]("https://www.rstudio.com/products/rstudio/download/")* respectivamente.
@@ -353,7 +354,7 @@ dados = dados %>% mutate(dens=pop/area)
 dados = dados %>% select(percap, analf, crime, estud, ndias,dens,expvida)
 ```
 Para melhor entendimento dos dados, podemos observar algumas estátisticas descritivas dos dados representadas na tabela 1.  
-  
+\newpage  
 \vspace{0.5cm}
 \begin{enumerate}
 \setcounter{enumi}{1}
@@ -500,7 +501,7 @@ mm_max = as.matrix(model.matrix(fit_max))
 Pode-se observar a partir da figura 1 que o modelo não teve um ajuste adequado. No gráfico A não observamos tendências,o que pode indicar uma independência dos dados. Já no gráfico B, observa-se uma leve heterocedasticidade, dado que os valores de resíduo studentizado parecem ser maiores em módulo conforme os valores ajustados aumentam. Porém, um fator de confundimento que pode ser levado em consideração é a assimetria da distribuição dos dados, já que é possível observar uma assimetria no histograma apresentado (gráfico C da figura 2), assim como uma tendencia no gráfico de envelopes (figura 3) o que nos dá indícios de falta de normalidade nos resíduos. Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimétrica, ou um modelo que leve em consideração heterocedásticidade. Dado o escopo do curso, procede-se com as análises posteriores.
 
 
-```{r residuos,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r residuos,fig.align='center',fig.height=5,fig.width=6, cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 # !!!acho que seria mais produtivo fazer análise de resíduos apenas para o modelo completo!!!
@@ -512,7 +513,7 @@ diag2norm(fit_max)
 `r legenda_graf2`
 \end{center}
 
-```{r envelope,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r envelope,cache = FALSE,echo=FALSE,fig.align='center',fig.height=4,fig.width=6.5, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #gráfico de envelopes
@@ -650,7 +651,7 @@ mm = as.matrix(model.matrix(fit_otimo))
 Em anuência ao ajuste do modelo anterior, este modelo também não apresentou um ajuste adequado, uma vez que se observa na figura 4 indícios de mal ajuste semelhantes aos observados na análise residual para o modelo anterior. A tendência no gráfico B indica heterocedasticidade dos resíduos e as tendências observadas nos gráfico C (Assimetria da distribuição) e na figura 5 (tendência nos envelopes) indicam a falta de normalidade nos resíduos.     
 Neste caso, deveria-se procurar modelos alternativos que levem em consideração uma distribuição assimetrica, ou um modelo que leve em consideração heterocedásticidade. Novamente, dado o escopo do curso, procede-se com as análises posteriores.
 
-```{r residuos modelo otimo,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r residuos modelo otimo,cache = FALSE,echo=FALSE, fig.align='center',fig.width=6,fig.height=5,warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #grpaficos para análise de resíduos
@@ -661,7 +662,7 @@ diag2norm(fit_otimo)
 `r legenda_graf4`
 \end{center}
 
-```{r envelope modelo otimo,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r envelope modelo otimo,cache = FALSE,fig.height=4,fig.width=6.5,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #gráfico de envelopes
@@ -698,10 +699,10 @@ $\beta_0$ & 70.8786 & 0.1028 & [70.6716 ; 71.0856] & 689.6565 & $<$0.0001 \\
 \end{tabular}
 \end{table}
   
+\newpage
+3.2 Multicolinearidade
 
-#Multicolinearidade
-
-Mesmo o modelo 2 não apresentando muitas covariáveis, é interessante, a fim de assegurar a validade dos resultados obtidos (desconsidere que o modelo não teve um bom ajuste), verificar também a possibilidade de se ter multicolinearidade presente no modelo ajustado. Com o propósito de identificar alguma indicação de multicolinearidade no modelo, podemos análisar os coeficiêntes de corelação linear entre as covariáveis "crime", "estud", "ndias" e "dens". Porém, observamos na tabela 4 (abaixo) que nenhum par de covariáveis apresenta coeficiente de correlação deveras alto. Aliás, a natureza das covariáveis presentes no medelo não apresentarem nenhum indício de serem fontes de multicolinearidade.
+Mesmo o modelo 2 não apresentando muitas covariáveis, é interessante, a fim de assegurar a validade dos resultados obtidos (desconsidere que o modelo não teve um bom ajuste), verificar também a possibilidade de se ter multicolinearidade presente no modelo ajustado. Com o propósito de identificar alguma indicação de multicolinearidade no modelo, podemos análisar os coeficiêntes de corelação linear entre as covariáveis "crime", "estud", "ndias" e "dens". Porém, observamos pela tabela 4 e figura 6,abaixo, que nenhum par de covariáveis apresenta coeficiente de correlação deveras alto. Aliás, a natureza das covariáveis presentes no medelo não apresentarem nenhum indício de serem fontes de multicolinearidade.
 
 \begin{center}
 `r legenda_table4`
@@ -714,6 +715,7 @@ dados_modelo_otimo <- dados[,3:6]
 
 correlacao <- round(cor(dados_modelo_otimo),4)
 #xtable(correlacao,digits = 4)
+
 
 
 #Verificação dos autovalores
@@ -738,14 +740,51 @@ crime & 1,0000 & -0,4880 & -0,5389 & 0,1110 \\
 \end{tabular}
 \end{table}
 
+\vspace{1cm}
+
+```{r, echo=FALSE, fig.align='center', fig.height=4.5, fig.width=6.5}
+
+library(ggplot2)
+lb <- colnames(correlacao)
+variaveis<-c(seq(1:4))
+#plot(seqx,correlacao[1,])
+
+#crime
+corcrime=data.frame(correlacao[1,],variaveis)
+colnames(corcrime)<-c("Crime","variaveis")
+#
+corestud=data.frame(correlacao[2,],variaveis)
+colnames(corestud)<-c("Estud","variaveis")
+#
+corndias=data.frame(correlacao[3,],variaveis)
+colnames(corndias)<-c("ndias","variaveis")
+#
+cordens=data.frame(correlacao[4,],variaveis)
+colnames(cordens)<-c("dens","variaveis")
+
+p1 <-ggplot(data=corcrime,aes(x=variaveis,y=Crime))+geom_point()+theme_light() + scale_x_discrete(limits=lb)
+
+p2 <-ggplot(data=corestud,aes(x=variaveis,y=Estud))+geom_point()+theme_light()+ scale_x_discrete(limits=lb)
+
+p3<-ggplot(data=corndias,aes(x=variaveis,y=ndias))+geom_point()+theme_light()+ scale_x_discrete(limits=lb)
+
+p4 <- ggplot(data=cordens,aes(x=variaveis,y=dens))+geom_point()+theme_light()+ scale_x_discrete(limits=lb)
+
+grid.arrange(p1,p2,p3,p4, ncol = 2, nrow = 2)
+```
+\begin{center}
+`r legenda_graf6`
+\end{center}
+
+
 Além disso, sabe-se que se a razão entre o maior autovalor ($\lambda_{max}$) e o menor autovalor ($\lambda_{min}$) da matriz $X^{t}$X (o chamado índice de condição) $K=\frac{\lambda_{max}}{\lambda_{min}}$ for maior que mil, geralmente, há indicios de multicolinearidade (veja Azevedo(2016)). Fazendo isso para o caso do problema em questão, tem-se que: $K=$ `r indcond`. Como $K < 1000$, portanto descartaremos a hipótese de multicolinearidade dos dados.
 
+\vspace{0.5cm}
+3.3 Alavancagem
 
-#Alavancagem
+Observando a figura 7 podemos identificar a existência de pontos distantes dos demais, o que é uma indicação de alavancagem.
 
-Observando a figura XX podemos identificar a existência de pontos distantes dos demais, o que é uma indicação de alavancagem.
-
-```{r alavancagem,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r alavancagem,fig.align='center',fig.height=4.5,fig.width=6.5,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #medidas de influência e alavancagem
@@ -753,7 +792,7 @@ Observando a figura XX podemos identificar a existência de pontos distantes dos
 anainflu_norm(fit_otimo)
 ```
 \begin{center}
-`r legenda_graf6`
+`r legenda_graf7`
 \end{center}
 
 
@@ -807,30 +846,30 @@ mm_adj1 = as.matrix(model.matrix(fit_otimo_adj1))
 ```
 
 Note, pelas figuras 7 e 8 que a análise de resíduos, salvo à mínimos detalhes, continua a mesma da análise apresentada para o Modelo 2, ou seja, mesmo retirando a observação de indice 40 da base de dados, o modelo continua com o mesmo ajuste inadequado.
-
-```{r residuos modelo otimo ajustado 1,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+\vspace{0.5cm}
+```{r residuos modelo otimo ajustado 1,fig.align='center',fig.height=4.5,fig.width=6.5,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #grpaficos para análise de resíduos
 diag2norm(fit_otimo_adj1)
 ```
 \begin{center}
-`r legenda_graf7`
+`r legenda_graf8`
 \end{center}
 
-```{r envelope modelo otimo ajustado 1,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r envelope modelo otimo ajustado 1,fig.align='center',fig.height=4.5,fig.width=6.5,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #gráfico de envelopes
 envelnorm(fit_otimo_adj1)
 ```
 \begin{center}
-`r legenda_graf8`
+`r legenda_graf9`
 \end{center}
-
+\vspace{0.5cm}
 Como se pode observar na tabela 5, ocorreu uma mudança significativa nos valores das medidas apresentadas na tabela, ou seja, existe indícios de que a observação 40 têm grande influência no modelo. Vamos então ajustar um modelo agora sem as observações 40 e 11 para avaliar as mudanças causadas em relação a este modelo (modelo 3).
-
-```{r}
+\vspace{0.5cm}
+```{r, echo=FALSE}
 medidas_comp_model1 = data.frame(medidas_fit_max,medidas_fit_otimo, medidas_fit_otimo_adj1)
 
 colnames(medidas_comp_model1) <- c("Modelo 1","Modelo 2","Modelo 3")
@@ -855,8 +894,9 @@ AIC & 119,5163 & 116,7045 & 110,0140 \\
 \end{tabular}
 \end{table}
 
-
+\vspace{0.5cm}
 Segue abaixo os gráficos para análise residual do modelo sem as observações 40 e 11 ("Modelo 4").
+
 
 ```{r fit_otimo_adj2,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 
@@ -884,26 +924,27 @@ mm_adj1 = as.matrix(model.matrix(fit_otimo_adj1))
 
 Note, pelas figuras 9 e 10 que a análise de resíduos, salvo à mínimos detalhes, continua a mesma da análise apresentada para o Modelo 2, ou seja, mesmo retirando as observação de indices 40 e 11 da base de dados, o modelo continua com o mesmo ajuste inadequado.
 
-```{r residuos modelo otimo ajustado 2,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+\vspace{1cm}
+```{r residuos modelo otimo ajustado 2,fig.align='center',fig.height=4.5,fig.width=6.5,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #grpaficos para análise de resíduos
 diag2norm(fit_otimo_adj2)
 ```
 \begin{center}
-`r legenda_graf9`
+`r legenda_graf10`
 \end{center}
 
-```{r envelope modelo otimo ajustado 2,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
+```{r envelope modelo otimo ajustado 2,fig.align='center',fig.height=4.5,fig.width=6.5,cache = FALSE,echo=FALSE, warning = FALSE,eval=TRUE,message = FALSE}
 #echo = FALSE não permite que o chunk apareça no pdf
 
 #gráfico de envelopes
 envelnorm(fit_otimo_adj2)
 ```
 \begin{center}
-`r legenda_graf10`
+`r legenda_graf11`
 \end{center}
-
+\vspace{0.5cm}
 Note agora, que não ocorreram mudanças significativas nos valores das medidas apresentadas pela tabela 5 deste modelo (modelo 4) com relação aos valores das medidas do modelo anterior (modelo 3), portanto, não existem indícios de que a observação 11 tenha grande influência no modelo.
 
 \begin{center}
@@ -921,6 +962,8 @@ colnames(medidas_comp_model2) <- c("Modelo 1","Modelo 2","Modelo 3","Modelo 4")
 #xtable(medidas_comp_model2,digits = 4)
 
 ```
+\vspace{0.5cm}
+
 \begin{table}[!h]
 \centering
 \begin{tabular}{rrrrr}
@@ -946,12 +989,10 @@ AIC & 119,5163 & 116,7045 & 110,0140 & 110,0140 \\
 
 Como visto, nenhum modelo destes propostos teve um bom ajuste ao conjunto de dados, não obstante, dado o escopo do curso, e dados os resultados mensionados anteriormente, consideramos que o modelo 3 foi o que teve ajuste mais satisfatório, pois é o que apresenta as melhores estimativas de comparação de modelo, ou seja valores baixos para AIC e BIC, e alto valor de Log-Verossimilhança, embora tenha valores de R2 e R2 ajustado menores que os valores apresentados para os modelos 1 e 2. Quanto aos valores das estatísticas apresentados na tabela 5, os modelos 3 e 4 são similares, porém o modelo 4 exclui uma observação desnecessariamente. Porém, levando-se em consideração que não estamos em contato com o experimentador, e por isso não teremos um entendimento maior quanto aos dados, não sabemos se a exclusão da observação 40 é válida, ou não, para produzir um modelo mais adequado.
 
-\newpage
-
-\vspace{0.5cm}
+\vspace{1cm}
 \begin{enumerate}
 \setcounter{enumi}{4}
-\item Referências Bibliográficas e Eletrônicas
+\item Referências Bibliográficas
 \end{enumerate}
 
 \vspace{0.3cm}
